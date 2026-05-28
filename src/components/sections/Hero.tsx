@@ -111,7 +111,7 @@ export function Hero() {
           <div className="animate-fade-in delay-100 mb-7 sm:mb-9 w-full flex flex-col items-center lg:items-start">
             <div className="flex items-center justify-center lg:justify-start mb-4 sm:mb-5">
               <span
-                className="text-label"
+                className="text-label flex items-center"
                 style={{
                   fontSize: "0.6rem",
                   letterSpacing: "0.3em",
@@ -119,7 +119,7 @@ export function Hero() {
                   userSelect: "none",
                 }}
               >
-                &#x276E;&nbsp;portfolio.2026&nbsp;&#x276F;
+                <span className="text-brand mr-1" style={{ color: "var(--color-brand)" }}>&#x276E;</span>&nbsp;portfolio.2026&nbsp;<span className="text-brand ml-1" style={{ color: "var(--color-brand)" }}>&#x276F;</span>
               </span>
             </div>
 
@@ -148,24 +148,27 @@ export function Hero() {
               </h2>
             </div>
 
-            {/* Role line */}
-            <p
-              className="mt-6 font-light text-center lg:text-left max-w-xl"
-              style={{
-                fontSize: "clamp(0.65rem, 1.1vw, 0.78rem)",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "var(--muted)",
-                lineHeight: 1.9,
-                fontFamily: "var(--font-sans)",
-              }}
-            >
-              Computer Science Undergraduate
-              <span className="inline-block sm:mx-2.5 mx-1.5 opacity-25">·</span>
-              Creative Technologist
-              <span className="inline-block sm:mx-2.5 mx-1.5 opacity-25">·</span>
-              Developer & Designer
-            </p>
+            {/* Role tags */}
+            <div className="mt-8 flex flex-wrap justify-center lg:justify-start gap-3 w-full max-w-xl animate-fade-in delay-200">
+              {[
+                "Computer Science Undergraduate",
+                "Creative Technologist",
+                "Developer & Designer"
+              ].map((role) => (
+                <div 
+                  key={role}
+                  className="flex items-center gap-2.5 px-4.5 py-2 glass rounded-full text-[10px] sm:text-xs uppercase tracking-[0.14em]"
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    color: "rgba(255,255,255,0.7)",
+                    border: "1px solid rgba(255,255,255,0.03)"
+                  }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: "var(--color-brand)" }}></span>
+                  <span className="font-light">{role}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </Container>

@@ -6,8 +6,8 @@
   --muted: #a0a0a0;
   
   /* Brand & UI Colors (mapped by Tailwind v4 automatically) */
-  --color-brand: #3b82f6;
-  --color-brand-glow: rgba(59, 130, 246, 0.15);
+  --color-brand: #3569e2;
+  --color-brand-glow: rgba(53, 105, 226, 0.15);
   --color-surface: #0a0a0a;
   --color-surface-hover: #121212;
   --color-border-subtle: rgba(255, 255, 255, 0.05);
@@ -59,10 +59,34 @@ body {
 
 /* Premium Classes */
 .text-gradient {
-  background: linear-gradient(to bottom right, #ffffff 30%, #a0a0a0 100%);
+  background: linear-gradient(to bottom, #ffffff 15%, #e1e1e1 45%, #a6a6a6 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Loop animations */
+@keyframes slide-down-loop {
+  0% {
+    top: -50%;
+    height: 30%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    height: 30%;
+    opacity: 0;
+  }
+}
+
+.animate-slide-down-loop {
+  animation: slide-down-loop 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
 .glass {

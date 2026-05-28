@@ -93,7 +93,7 @@ export function Navbar() {
                   { label: 'Home', href: '#top' },
                   { label: 'Real Me', href: '#about' },
                   { label: 'Portfolio', href: '#projects' },
-                  { label: 'Resume', href: '#resume' },
+                  { label: 'Resume', href: '#resume' }, // TODO: Replace with link to PDF resume file or dedicated page if required
                   { label: 'Contact', href: '#contact' },
                 ].map((item, i) => (
                   <Link 
@@ -110,7 +110,14 @@ export function Navbar() {
                       transitionDelay: isOpen ? `${100 + i * 50}ms` : '0ms'
                     }}
                   >
-                    <span className="text-xs sm:text-sm font-mono text-brand/60 group-hover:text-brand mr-4 sm:mr-6" style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>
+                    <span 
+                      className="text-xs sm:text-sm font-mono text-brand mr-4 sm:mr-6 opacity-90 group-hover:opacity-100 transition-opacity" 
+                      style={{ 
+                        fontFamily: "var(--font-mono)", 
+                        letterSpacing: "0.1em",
+                        color: "var(--color-brand)"
+                      }}
+                    >
                       0{i + 1}
                     </span>
                     <span>{item.label}</span>
