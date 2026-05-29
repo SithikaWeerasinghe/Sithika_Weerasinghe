@@ -1,39 +1,219 @@
-import React from "react";
-import { Container } from "@/components/ui/Container";
+"use client";
+
+import { useState } from "react";
+
+const POVS = [
+  {
+    id: "everyone",
+    label: "Everyone",
+    icon: (
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="14" height="14" aria-hidden="true">
+        <circle cx="10" cy="7" r="3.5" />
+        <path d="M2.5 17c0-3.314 3.358-6 7.5-6s7.5 2.686 7.5 6" strokeLinecap="round" />
+      </svg>
+    ),
+    quote:
+      "I'm a Computer Science undergrad who's been wired to tech since day one. I build things that live at the edge of logic and creativity — clean, purposeful, and designed to leave an impression.",
+  },
+  {
+    id: "recruiters",
+    label: "Recruiters",
+    icon: (
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="14" height="14" aria-hidden="true">
+        <rect x="2" y="7" width="16" height="11" rx="1.5" />
+        <path d="M6.5 7V5.5a3.5 3.5 0 017 0V7" strokeLinecap="round" />
+      </svg>
+    ),
+    quote:
+      "I thrive on turning concepts into reality — from pure imagination straight through to live implementation. I pick up new tools and frameworks fast. Point me at something worth building and I'll find a way.",
+  },
+  {
+    id: "developers",
+    label: "Developers",
+    icon: (
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="14" height="14" aria-hidden="true">
+        <path d="M7 6L3 10l4 4M13 6l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+    quote:
+      "Clean, readable code is non-negotiable for me — proper formatting, sensible structure, code that still makes sense six months later. Always down for a collab or a good challenge. Hit me up.",
+  },
+];
 
 export function About() {
+  const [active, setActive] = useState(0);
+  const pov = POVS[active];
+
   return (
-    <section id="about" className="section-padding border-t border-white/[0.02]">
-      <Container>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <div>
-            <h2 className="text-4xl md:text-5xl font-extrabold mb-8" style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.03em" }}>
-              Blending code <br /> with <span className="text-brand">creativity.</span>
-            </h2>
-            <div className="space-y-6 text-lg text-muted" style={{ fontFamily: "var(--font-sans)", fontWeight: 300, lineHeight: 1.75 }}>
-              <p>
-                As a Computer Science undergraduate, I'm driven by the intersection of complex
-                logic and beautiful aesthetics. I don't just write code; I craft experiences
-                that feel alive and purposeful.
-              </p>
-              <p>
-                My approach is rooted in technical excellence and a deep appreciation for
-                minimal design. Whether it's developing scalable backend systems or
-                crafting fluid user interfaces, I focus on the small details that make
-                big impacts.
-              </p>
-            </div>
+    <section
+      id="about"
+      className="relative overflow-hidden border-t"
+      style={{
+        background: "#020202",
+        borderColor: "rgba(255,255,255,0.04)",
+        minHeight: "88vh",
+      }}
+    >
+      {/* Decorative section number */}
+      <div
+        className="absolute top-[-0.05em] right-[3%] font-extrabold select-none pointer-events-none"
+        style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "clamp(14rem, 26vw, 28rem)",
+          color: "rgba(255,255,255,0.016)",
+          letterSpacing: "-0.06em",
+          lineHeight: 1,
+        }}
+        aria-hidden="true"
+      >
+        02
+      </div>
+
+      {/* Ambient blue glow */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 55% 50% at 12% 60%, rgba(53,105,226,0.055) 0%, transparent 70%)",
+        }}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] min-h-[88vh]">
+
+        {/* ── Left: heading + horizontal tabs ── */}
+        <div
+          className="relative flex flex-col justify-center py-24 lg:py-0"
+          style={{
+            paddingLeft: "clamp(1.5rem, 5vw, 6rem)",
+            paddingRight: "clamp(1.5rem, 3vw, 3.5rem)",
+            borderRight: "1px solid rgba(255,255,255,0.05)",
+          }}
+        >
+          {/* Eyebrow */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-5 h-px" style={{ background: "var(--color-brand)" }} />
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "0.6rem",
+                letterSpacing: "0.28em",
+                color: "rgba(255,255,255,0.25)",
+                textTransform: "uppercase",
+              }}
+            >
+              REAL ME
+            </span>
           </div>
-          <div className="relative aspect-square">
-            <div className="absolute inset-0 glass rounded-2xl overflow-hidden">
-              {/* Placeholder for an image or decorative element */}
-              <div className="w-full h-full bg-neutral-900 flex items-center justify-center text-neutral-800 font-bold text-4xl">
-                LK
-              </div>
-            </div>
+
+          {/* Main heading */}
+          <h2
+            className="font-extrabold text-white leading-none mb-8"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(4rem, 8vw, 7.5rem)",
+              letterSpacing: "-0.04em",
+            }}
+          >
+            Real<br />Me.
+          </h2>
+
+          {/* Choose your POV label — more visible */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-6 h-px" style={{ background: "rgba(255,255,255,0.2)" }} />
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "0.62rem",
+                letterSpacing: "0.24em",
+                color: "rgba(255,255,255,0.55)",
+                textTransform: "uppercase",
+              }}
+            >
+              CHOOSE YOUR POV
+            </span>
+          </div>
+
+          {/* Horizontal tabs */}
+          <div className="flex items-center gap-7">
+            {POVS.map((p, i) => (
+              <button
+                key={p.id}
+                onClick={() => setActive(i)}
+                className="flex items-center gap-2 pb-2.5 transition-all duration-200"
+                style={{
+                  borderBottom: active === i
+                    ? "1.5px solid var(--color-brand)"
+                    : "1.5px solid transparent",
+                  color: active === i
+                    ? "rgba(255,255,255,0.95)"
+                    : "rgba(255,255,255,0.55)",
+                }}
+              >
+                <span
+                  className="flex-shrink-0 transition-colors duration-200"
+                  style={{
+                    color: active === i ? "var(--color-brand)" : "rgba(255,255,255,0.45)",
+                  }}
+                >
+                  {p.icon}
+                </span>
+                <span
+                  className="text-sm font-medium transition-colors duration-200"
+                  style={{ fontFamily: "var(--font-sans)" }}
+                >
+                  {p.label}
+                </span>
+              </button>
+            ))}
           </div>
         </div>
-      </Container>
+
+        {/* ── Right: quote ── */}
+        <div
+          className="relative flex flex-col justify-center py-24 lg:py-0"
+          style={{
+            paddingLeft: "clamp(2.5rem, 6vw, 7rem)",
+            paddingRight: "clamp(1.5rem, 5vw, 6rem)",
+          }}
+        >
+          <blockquote key={pov.id} className="animate-fade-in">
+            <span
+              className="block font-extrabold leading-none mb-1 select-none"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(5rem, 9vw, 8rem)",
+                color: "var(--color-brand)",
+                opacity: 0.55,
+                lineHeight: 0.85,
+              }}
+              aria-hidden="true"
+            >
+              "
+            </span>
+
+            <p
+              className="font-extrabold text-white"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(1.7rem, 3vw, 2.7rem)",
+                letterSpacing: "-0.02em",
+                lineHeight: 1.18,
+              }}
+            >
+              {pov.quote}
+            </p>
+
+            <div
+              className="mt-10 h-px"
+              style={{
+                width: "4rem",
+                background: "linear-gradient(to right, var(--color-brand), transparent)",
+              }}
+            />
+          </blockquote>
+        </div>
+
+      </div>
     </section>
   );
 }
