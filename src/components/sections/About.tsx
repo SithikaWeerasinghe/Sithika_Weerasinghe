@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "motion/react";
 
 const POVS = [
   {
@@ -54,22 +55,8 @@ export function About() {
         minHeight: "88vh",
       }}
     >
-      {/* Decorative section number */}
-      <div
-        className="absolute top-[-0.05em] right-[3%] font-extrabold select-none pointer-events-none"
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "clamp(14rem, 26vw, 28rem)",
-          color: "rgba(255,255,255,0.016)",
-          letterSpacing: "-0.06em",
-          lineHeight: 1,
-        }}
-        aria-hidden="true"
-      >
-        02
-      </div>
 
-      {/* Ambient blue glow */}
+{/* Ambient blue glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -81,13 +68,17 @@ export function About() {
       <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] min-h-[88vh]">
 
         {/* ── Left: heading + horizontal tabs ── */}
-        <div
+        <motion.div
           className="relative flex flex-col justify-center py-24 lg:py-0"
           style={{
             paddingLeft: "clamp(1.5rem, 5vw, 6rem)",
             paddingRight: "clamp(1.5rem, 3vw, 3.5rem)",
             borderRight: "1px solid rgba(255,255,255,0.05)",
           }}
+          initial={{ opacity: 0, x: -35, y: 10 }}
+          whileInView={{ opacity: 1, x: 0, y: 0 }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+          viewport={{ once: false, amount: 0.3 }}
         >
           {/* Eyebrow */}
           <div className="flex items-center gap-3 mb-6">
@@ -166,15 +157,19 @@ export function About() {
               </button>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         {/* ── Right: quote ── */}
-        <div
+        <motion.div
           className="relative flex flex-col justify-center py-24 lg:py-0"
           style={{
             paddingLeft: "clamp(2.5rem, 6vw, 7rem)",
             paddingRight: "clamp(1.5rem, 5vw, 6rem)",
           }}
+          initial={{ opacity: 0, x: 35, y: 10 }}
+          whileInView={{ opacity: 1, x: 0, y: 0 }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.18 }}
+          viewport={{ once: false, amount: 0.3 }}
         >
           <blockquote key={pov.id} className="animate-fade-in">
             <span
@@ -211,7 +206,7 @@ export function About() {
               }}
             />
           </blockquote>
-        </div>
+        </motion.div>
 
       </div>
     </section>
