@@ -115,14 +115,15 @@ export function Navbar() {
                   { label: "Home", href: "#top" },
                   { label: "Real Me", href: "#about" },
                   { label: "Portfolio", href: "#projects" },
-                  { label: "Resume", href: "#resume" },
+                  { label: "What They Say", href: "#testimonials" },
+                  { label: "Certification", href: "#certification" },
                   { label: "Contact", href: "#contact" },
                 ].map((item, i) => (
                   <Link
                     key={item.label}
                     href={item.href}
                     onClick={() => setIsOpen(false)}
-                    className="relative flex items-center text-4xl sm:text-5xl md:text-7xl text-white/25 hover:text-white hover:translate-x-5 transition-all duration-300 group"
+                    className="relative flex items-center text-3xl sm:text-4xl md:text-[3.5rem] text-white/25 hover:text-white hover:translate-x-5 transition-all duration-300 group"
                     style={{
                       fontFamily: "var(--font-display)",
                       fontWeight: 800,

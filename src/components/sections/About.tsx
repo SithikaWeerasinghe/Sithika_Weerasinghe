@@ -157,6 +157,7 @@ export function About() {
               </button>
             ))}
           </div>
+
         </motion.div>
 
         {/* ── Right: quote ── */}
