@@ -5,9 +5,7 @@ import { About } from "@/components/sections/About";
 import { Projects } from "@/components/sections/Projects";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { Certification } from "@/components/sections/Certification";
-import { Skills } from "@/components/sections/Skills";
 import { Contact } from "@/components/sections/Contact";
-import { Footer } from "@/components/sections/Footer";
 
 export default function Home() {
   return (
@@ -19,9 +17,7 @@ export default function Home() {
       <Projects />
       <Testimonials />
       <Certification />
-      <Skills />
       <Contact />
-      <Footer />
     </main>
   );
 }
