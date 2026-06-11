@@ -14,7 +14,27 @@
 }
 
 html {
+  /* Native fallback when JS / Lenis is unavailable. Lenis overrides this
+     to `auto` via the .lenis-smooth class while it controls scrolling. */
   scroll-behavior: smooth;
+}
+
+/* ── Lenis smooth scroll (recommended baseline styles) ── */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
 }
 
 body {
@@ -155,4 +175,24 @@ body {
   animation: marquee 40s linear infinite;
   width: max-content;
   display: flex;
+}
+
+/* Premium thin scrollbar — used inside the project detail panel */
+.premium-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+}
+.premium-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.premium-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.premium-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  transition: background 0.25s ease;
+}
+.premium-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(53, 105, 226, 0.5);
 }

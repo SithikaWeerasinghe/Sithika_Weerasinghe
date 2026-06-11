@@ -14,6 +14,7 @@ type Project = {
   title: string;
   label: string;
   type: string;
+  status: string;
   description: string;
   role: string;
   stack: string[];
@@ -27,6 +28,7 @@ const PROJECTS: Project[] = [
     title: "Adorix",
     label: "AI-Powered Smart Advertising Kiosk",
     type: "AI + Edge Device System · Smart Advertising Platform",
+    status: "Team Project · Live",
     description:
       "An AI-powered smart advertising kiosk that combines computer vision, voice interaction, backend intelligence, cloud sync, and a hosted web platform for real physical deployment.",
     role: "Team Project — IoT / device integration, computer vision, voice interaction, backend logic, Supabase sync, documentation, and web authentication / payment / product logic.",
@@ -49,6 +51,7 @@ const PROJECTS: Project[] = [
     title: "ML Project",
     label: "Details updating soon",
     type: "Machine Learning Project",
+    status: "In Progress",
     description:
       "A machine learning project focused on solving a real prediction or classification problem through a structured model pipeline and practical evaluation workflow.",
     role: "Model development / evaluation.",
@@ -61,6 +64,7 @@ const PROJECTS: Project[] = [
     title: "ApexFled",
     label: "Full-Stack E-Commerce Platform",
     type: "Full-Stack E-Commerce Platform",
+    status: "Full-Stack Build · Live",
     description:
       "A production-ready digital products e-commerce platform with variant-based inventory, integrated payments, and automated account delivery.",
     role: "Full-Stack Developer.",
@@ -82,6 +86,7 @@ const PROJECTS: Project[] = [
     title: "GRAS",
     label: "Restaurant Website for Real Customer Use",
     type: "Restaurant Website · Real Client Web Project",
+    status: "Client Project",
     description:
       "A premium restaurant website built as a real client-facing platform for showcasing the brand, menu, and enabling online table reservations.",
     role: "Developer / Major Contributor.",
@@ -101,6 +106,7 @@ const PROJECTS: Project[] = [
     title: "SceneSeek",
     label: "Computer Vision / ML Prototype",
     type: "Computer Vision · Machine Learning Prototype",
+    status: "Solo Project · Prototype",
     description:
       "A computer vision prototype that identifies a movie from a short video clip using deep visual feature extraction and similarity matching.",
     role: "Sole Developer.",
@@ -154,15 +160,49 @@ function StackTags({ stack }: { stack: string[] }) {
   );
 }
 
+const ArrowGlyph = () => (
+  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+    <path
+      d="M3 9L9 3M9 3H4M9 3V8"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+function DisabledPill({ label }: { label: string }) {
+  return (
+    <span
+      className="inline-flex items-center"
+      style={{
+        fontFamily: "var(--font-mono)",
+        fontSize: "0.58rem",
+        letterSpacing: "0.14em",
+        textTransform: "uppercase",
+        color: "rgba(255,255,255,0.25)",
+        padding: "0.6rem 1.1rem",
+        borderRadius: "9999px",
+        border: "1px dashed rgba(255,255,255,0.1)",
+        cursor: "not-allowed",
+      }}
+    >
+      {label}
+    </span>
+  );
+}
+
 function ProjectLinks({ project }: { project: Project }) {
   return (
     <div className="flex items-center gap-3 flex-wrap">
+      {/* Live */}
       {project.live ? (
         <a
           href={project.live}
           target="_blank"
           rel="noopener noreferrer"
-          className="group/link inline-flex items-center gap-2"
+          className="inline-flex items-center gap-2"
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: "0.62rem",
@@ -184,19 +224,14 @@ function ProjectLinks({ project }: { project: Project }) {
             e.currentTarget.style.boxShadow = "none";
           }}
         >
-          Visit Live
-          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-            <path
-              d="M3 9L9 3M9 3H4M9 3V8"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          Visit Live Site
+          <ArrowGlyph />
         </a>
-      ) : null}
+      ) : (
+        <DisabledPill label="Live Soon" />
+      )}
 
+      {/* GitHub */}
       {project.github ? (
         <a
           href={project.github}
@@ -226,32 +261,11 @@ function ProjectLinks({ project }: { project: Project }) {
             e.currentTarget.style.background = "transparent";
           }}
         >
-          GitHub
-          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-            <path
-              d="M3 9L9 3M9 3H4M9 3V8"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          View GitHub
+          <ArrowGlyph />
         </a>
       ) : (
-        <span
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "0.58rem",
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "rgba(255,255,255,0.25)",
-            padding: "0.6rem 1.1rem",
-            borderRadius: "9999px",
-            border: "1px dashed rgba(255,255,255,0.1)",
-          }}
-        >
-          Repo coming soon
-        </span>
+        <DisabledPill label="Repo Soon" />
       )}
     </div>
   );
@@ -290,9 +304,11 @@ function DetailPanel({ project }: { project: Project }) {
           transition={{ duration: 0.62, ease: EASE }}
           className="relative flex flex-col h-full"
         >
-          {/* Eyebrow label */}
-          <div className="flex items-center gap-3 mb-7">
+          {/* ── Header (fixed) ── */}
+          <div className="flex-shrink-0">
+            {/* Eyebrow label */}
             <span
+              className="block mb-5"
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: "0.6rem",
@@ -303,99 +319,138 @@ function DetailPanel({ project }: { project: Project }) {
             >
               {project.label}
             </span>
-          </div>
 
-          {/* Title */}
-          <h3
-            className="font-extrabold text-white"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(2.4rem, 3.4vw, 3.6rem)",
-              letterSpacing: "-0.03em",
-              lineHeight: 1.02,
-              marginBottom: "0.9rem",
-            }}
-          >
-            {project.title}
-          </h3>
-
-          {/* Type */}
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "0.64rem",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.35)",
-              marginBottom: "1.8rem",
-            }}
-          >
-            {project.type}
-          </span>
-
-          {/* Description */}
-          <p
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: "clamp(0.95rem, 1.1vw, 1.08rem)",
-              lineHeight: 1.7,
-              color: "rgba(255,255,255,0.72)",
-              marginBottom: "2rem",
-              maxWidth: "46ch",
-            }}
-          >
-            {project.description}
-          </p>
-
-          {/* Role */}
-          <div className="mb-7">
-            <span
+            {/* Title */}
+            <h3
+              className="font-extrabold text-white"
               style={{
-                display: "block",
-                fontFamily: "var(--font-mono)",
-                fontSize: "0.56rem",
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.3)",
-                marginBottom: "0.55rem",
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(2.2rem, 3.2vw, 3.3rem)",
+                letterSpacing: "-0.03em",
+                lineHeight: 1.02,
+                marginBottom: "0.9rem",
               }}
             >
-              My Role
-            </span>
-            <p
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: "0.88rem",
-                lineHeight: 1.6,
-                color: "rgba(255,255,255,0.55)",
-                maxWidth: "48ch",
-              }}
-            >
-              {project.role}
-            </p>
-          </div>
+              {project.title}
+            </h3>
 
-          {/* Stack — pushed toward bottom */}
-          <div className="mt-auto">
-            <span
-              style={{
-                display: "block",
-                fontFamily: "var(--font-mono)",
-                fontSize: "0.56rem",
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.3)",
-                marginBottom: "0.85rem",
-              }}
-            >
-              Tech Stack
-            </span>
-            <StackTags stack={project.stack} />
-
-            {/* Links */}
-            <div className="mt-7">
-              <ProjectLinks project={project} />
+            {/* Meta row — status chip + type */}
+            <div className="flex items-center gap-3 flex-wrap" style={{ marginBottom: "1.6rem" }}>
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "0.55rem",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "var(--color-brand)",
+                  padding: "3px 9px",
+                  borderRadius: "9999px",
+                  background: "rgba(53,105,226,0.1)",
+                  border: "1px solid rgba(53,105,226,0.22)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {project.status}
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "0.6rem",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.32)",
+                }}
+              >
+                {project.type}
+              </span>
             </div>
+          </div>
+
+          {/* ── Scrollable body ── */}
+          <div className="relative flex-1 min-h-0">
+            <div className="premium-scroll h-full overflow-y-auto pr-3" style={{ paddingBottom: "1.5rem" }}>
+              {/* Description */}
+              <p
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "clamp(0.95rem, 1.1vw, 1.08rem)",
+                  lineHeight: 1.7,
+                  color: "rgba(255,255,255,0.72)",
+                  marginBottom: "1.9rem",
+                  maxWidth: "48ch",
+                }}
+              >
+                {project.description}
+              </p>
+
+              {/* Role */}
+              <div className="mb-7">
+                <span
+                  style={{
+                    display: "block",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "0.56rem",
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.3)",
+                    marginBottom: "0.55rem",
+                  }}
+                >
+                  My Role
+                </span>
+                <p
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "0.88rem",
+                    lineHeight: 1.6,
+                    color: "rgba(255,255,255,0.55)",
+                    maxWidth: "50ch",
+                  }}
+                >
+                  {project.role}
+                </p>
+              </div>
+
+              {/* Stack */}
+              <div>
+                <span
+                  style={{
+                    display: "block",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "0.56rem",
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.3)",
+                    marginBottom: "0.85rem",
+                  }}
+                >
+                  Tech Stack
+                </span>
+                <StackTags stack={project.stack} />
+              </div>
+            </div>
+
+            {/* Bottom fade — hints at more scrollable content */}
+            <div
+              className="pointer-events-none absolute bottom-0 left-0 right-0"
+              style={{
+                height: "2.5rem",
+                background:
+                  "linear-gradient(to bottom, transparent, rgba(4,5,8,0.9))",
+              }}
+            />
+          </div>
+
+          {/* ── Footer (pinned) — action buttons ── */}
+          <div
+            className="flex-shrink-0"
+            style={{
+              marginTop: "1.4rem",
+              paddingTop: "1.4rem",
+              borderTop: "1px solid rgba(255,255,255,0.06)",
+            }}
+          >
+            <ProjectLinks project={project} />
           </div>
         </motion.div>
       </AnimatePresence>
@@ -488,34 +543,57 @@ function ProjectsDesktop() {
           </div>
 
           {/* Counter */}
-          <div className="flex items-baseline gap-1">
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={PROJECTS[active].id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.35, ease: EASE }}
+          <div className="flex flex-col items-end">
+            <div className="flex items-baseline gap-1">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={PROJECTS[active].id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.35, ease: EASE }}
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "1.6rem",
+                    fontWeight: 800,
+                    color: "var(--color-brand)",
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  {PROJECTS[active].id}
+                </motion.span>
+              </AnimatePresence>
+              <span
                 style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "1.6rem",
-                  fontWeight: 800,
-                  color: "var(--color-brand)",
-                  letterSpacing: "-0.02em",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "0.7rem",
+                  color: "rgba(255,255,255,0.2)",
                 }}
               >
-                {PROJECTS[active].id}
+                / {String(count).padStart(2, "0")}
+              </span>
+            </div>
+
+            {/* Active project label */}
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={PROJECTS[active].id + "-label"}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.35, ease: EASE }}
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "0.55rem",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.3)",
+                  marginTop: "0.35rem",
+                }}
+              >
+                {PROJECTS[active].title}
               </motion.span>
             </AnimatePresence>
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "0.7rem",
-                color: "rgba(255,255,255,0.2)",
-              }}
-            >
-              / {String(count).padStart(2, "0")}
-            </span>
           </div>
         </div>
 
