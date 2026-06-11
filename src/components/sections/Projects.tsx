@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   motion,
   AnimatePresence,
@@ -274,43 +274,63 @@ function ProjectLinks({ project }: { project: Project }) {
 /* ─────────────────────────  Detail panel (desktop)  ───────────────────────── */
 
 function DetailPanel({ project }: { project: Project }) {
-  // Keep the previous listener's teardown so we can detach when the panel
-  // re-mounts (the inner block remounts on every project change).
-  const detachWheel = useRef<(() => void) | null>(null);
+  // The panel (stable across project swaps) owns the wheel listener; the inner
+  // body remounts on every project change, so we track its current node here.
+  const panelRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  // Capture-and-release: while the description still has room to scroll in the
-  // wheel's direction, scroll it here and stop the page from advancing the
-  // project. At the top/bottom edge we do nothing, so the wheel "releases" to
-  // the page and moves to the prev/next project — so it never feels trapped.
-  const attachScroller = useCallback((node: HTMLDivElement | null) => {
-    detachWheel.current?.();
-    detachWheel.current = null;
-    if (!node) return;
+  // Nested scroll, Lenis-aware.
+  //
+  // Lenis runs a wheel listener on `window` and lerps the whole page (that is
+  // what drives the pinned project progression). The panel sits *below* window
+  // in the DOM, so its wheel listener fires first during bubbling — which lets
+  // us decide, per event, who gets the scroll:
+  //
+  //   • Inner body still has room to move in the wheel's direction →
+  //     preventDefault() (block native) + stopPropagation() (block Lenis) and
+  //     scroll the description ourselves. The section stays put.
+  //   • Inner body is at the top/bottom edge (or has nothing to scroll) →
+  //     let the event bubble untouched to Lenis → the page scrolls and the
+  //     project advances.
+  //
+  // So the panel only "captures" while there is something left to read, and
+  // releases the instant it hits an edge — a nested scroll area, never a trap.
+  // It is naturally hover-gated: the listener only fires while the cursor is
+  // over the panel; elsewhere the page scrolls normally.
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
 
     const onWheel = (e: WheelEvent) => {
+      if (e.deltaY === 0) return; // ignore horizontal / zero ticks
+      const node = scrollRef.current;
+      if (!node) return; // mid project-swap → let the page scroll
+
       const canScroll = node.scrollHeight > node.clientHeight + 1;
-      if (!canScroll) return; // nothing to read — let the page change projects
+      if (!canScroll) return; // nothing to read → release to the section
 
       const atTop = node.scrollTop <= 0;
       const atBottom =
         node.scrollTop + node.clientHeight >= node.scrollHeight - 1;
       const goingDown = e.deltaY > 0;
-      const goingUp = e.deltaY < 0;
 
-      if ((goingDown && !atBottom) || (goingUp && !atTop)) {
-        e.preventDefault(); // hold the page; scroll the description instead
+      // Room left in this direction → keep the scroll inside the panel.
+      if ((goingDown && !atBottom) || (!goingDown && !atTop)) {
+        e.preventDefault(); // hold native page scroll
+        e.stopPropagation(); // hold Lenis → section does not advance
         node.scrollTop += e.deltaY;
       }
-      // else: at an edge → fall through to native scroll → next/prev project
+      // else: at an edge → fall through to Lenis → prev/next project
     };
 
     // Non-passive so preventDefault() can hold the page scroll.
-    node.addEventListener("wheel", onWheel, { passive: false });
-    detachWheel.current = () => node.removeEventListener("wheel", onWheel);
+    panel.addEventListener("wheel", onWheel, { passive: false });
+    return () => panel.removeEventListener("wheel", onWheel);
   }, []);
 
   return (
     <div
+      ref={panelRef}
       className="relative h-full w-full overflow-hidden"
       style={{
         borderRadius: "20px",
@@ -404,19 +424,24 @@ function DetailPanel({ project }: { project: Project }) {
           {/* ── Scrollable body ── */}
           <div className="relative flex-1 min-h-0">
             <div
-              ref={attachScroller}
+              ref={scrollRef}
               className="premium-scroll h-full overflow-y-auto pr-3"
-              style={{ paddingBottom: "1.5rem" }}
+              style={{
+                paddingBottom: "2.75rem",
+                // Belt-and-suspenders: stop any native scroll from chaining to
+                // the page. Lenis (handled in JS above) is unaffected by this.
+                overscrollBehavior: "contain",
+              }}
             >
               {/* Description */}
               <p
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontSize: "clamp(0.95rem, 1.1vw, 1.08rem)",
-                  lineHeight: 1.7,
-                  color: "rgba(255,255,255,0.72)",
+                  lineHeight: 1.75,
+                  color: "rgba(255,255,255,0.82)",
                   marginBottom: "1.9rem",
-                  maxWidth: "48ch",
+                  maxWidth: "50ch",
                 }}
               >
                 {project.description}
