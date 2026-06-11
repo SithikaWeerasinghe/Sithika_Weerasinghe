@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   motion,
   AnimatePresence,
@@ -274,6 +274,41 @@ function ProjectLinks({ project }: { project: Project }) {
 /* ─────────────────────────  Detail panel (desktop)  ───────────────────────── */
 
 function DetailPanel({ project }: { project: Project }) {
+  // Keep the previous listener's teardown so we can detach when the panel
+  // re-mounts (the inner block remounts on every project change).
+  const detachWheel = useRef<(() => void) | null>(null);
+
+  // Capture-and-release: while the description still has room to scroll in the
+  // wheel's direction, scroll it here and stop the page from advancing the
+  // project. At the top/bottom edge we do nothing, so the wheel "releases" to
+  // the page and moves to the prev/next project — so it never feels trapped.
+  const attachScroller = useCallback((node: HTMLDivElement | null) => {
+    detachWheel.current?.();
+    detachWheel.current = null;
+    if (!node) return;
+
+    const onWheel = (e: WheelEvent) => {
+      const canScroll = node.scrollHeight > node.clientHeight + 1;
+      if (!canScroll) return; // nothing to read — let the page change projects
+
+      const atTop = node.scrollTop <= 0;
+      const atBottom =
+        node.scrollTop + node.clientHeight >= node.scrollHeight - 1;
+      const goingDown = e.deltaY > 0;
+      const goingUp = e.deltaY < 0;
+
+      if ((goingDown && !atBottom) || (goingUp && !atTop)) {
+        e.preventDefault(); // hold the page; scroll the description instead
+        node.scrollTop += e.deltaY;
+      }
+      // else: at an edge → fall through to native scroll → next/prev project
+    };
+
+    // Non-passive so preventDefault() can hold the page scroll.
+    node.addEventListener("wheel", onWheel, { passive: false });
+    detachWheel.current = () => node.removeEventListener("wheel", onWheel);
+  }, []);
+
   return (
     <div
       className="relative h-full w-full overflow-hidden"
@@ -368,7 +403,11 @@ function DetailPanel({ project }: { project: Project }) {
 
           {/* ── Scrollable body ── */}
           <div className="relative flex-1 min-h-0">
-            <div className="premium-scroll h-full overflow-y-auto pr-3" style={{ paddingBottom: "1.5rem" }}>
+            <div
+              ref={attachScroller}
+              className="premium-scroll h-full overflow-y-auto pr-3"
+              style={{ paddingBottom: "1.5rem" }}
+            >
               {/* Description */}
               <p
                 style={{
