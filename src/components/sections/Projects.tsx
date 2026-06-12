@@ -16,6 +16,12 @@ type Project = {
   live: string | null;
   github: string | null;
   /**
+   * Optional label for the live slot when there is no live URL — e.g. a local
+   * prototype that will never be hosted ("Local Project"). Falls back to
+   * "Live Soon" when omitted, so existing projects are unaffected.
+   */
+  liveNote?: string;
+  /**
    * Screenshots for the slider. Drop files in `public/projects/` and list
    * their paths here, e.g. ["/projects/adorix-1.png", "/projects/adorix-2.png"].
    * Leave empty to show the "screenshot coming soon" placeholder frame.
@@ -131,7 +137,7 @@ const PROJECTS: Project[] = [
     title: "GRAS",
     label: "Restaurant Website for Real Customer Use",
     type: "Restaurant Website · Real Client Web Project",
-    status: "Client Project",
+    status: "Team Project · In Development",
     description:
       "A premium restaurant website built as a real client-facing platform for showcasing the brand, menu, and enabling online table reservations.",
     role: "Developer / Major Contributor.",
@@ -145,7 +151,9 @@ const PROJECTS: Project[] = [
     ],
     live: null,
     github: "https://github.com/SithikaWeerasinghe/Gras-Restaurant",
-    images: [],
+    images: [
+      "/projects/gras-home.png", // Slide 1 — homepage / brand hero
+    ],
   },
   {
     id: "05",
@@ -158,8 +166,12 @@ const PROJECTS: Project[] = [
     role: "Sole Developer.",
     stack: ["Python", "PyTorch", "TorchVision", "OpenCV", "NumPy", "ResNet18"],
     live: null,
-    github: null,
-    images: [],
+    // No live site by design — show a tasteful status label instead of "Live Soon".
+    liveNote: "Local Project",
+    github: "https://github.com/SithikaWeerasinghe/scene-seek",
+    images: [
+      "/projects/sceneseek-result.png", // Slide 1 — pipeline output / final movie match
+    ],
   },
 ];
 
@@ -395,7 +407,7 @@ function ProjectLinks({ project }: { project: Project }) {
           <ArrowGlyph />
         </a>
       ) : (
-        <DisabledPill label="Live Soon" />
+        <DisabledPill label={project.liveNote ?? "Live Soon"} />
       )}
 
       {/* GitHub */}

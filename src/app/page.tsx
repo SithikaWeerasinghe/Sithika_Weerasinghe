@@ -3,7 +3,9 @@ import { Hero } from "@/components/sections/Hero";
 import { TechTicker } from "@/components/sections/TechTicker";
 import { About } from "@/components/sections/About";
 import { Projects } from "@/components/sections/Projects";
-import { Testimonials } from "@/components/sections/Testimonials";
+// Archived until real client testimonials are ready — restore by uncommenting
+// this import and the <Testimonials /> usage below. Component file is kept intact.
+// import { Testimonials } from "@/components/sections/Testimonials";
 import { Certification } from "@/components/sections/Certification";
 import { Contact } from "@/components/sections/Contact";
 
@@ -15,7 +17,7 @@ export default function Home() {
       <About />
 <TechTicker />
       <Projects />
-      <Testimonials />
+      {/* <Testimonials /> — archived until real client testimonials are ready */}
       <Certification />
       <Contact />
     </main>

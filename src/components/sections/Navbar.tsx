@@ -115,7 +115,8 @@ export function Navbar() {
                   { label: "Home", href: "#top" },
                   { label: "Real Me", href: "#about" },
                   { label: "Portfolio", href: "#projects" },
-                  { label: "What They Say", href: "#testimonials" },
+                  // Archived with the testimonials section — restore alongside it.
+                  // { label: "What They Say", href: "#testimonials" },
                   { label: "Certification", href: "#certification" },
                   { label: "Contact", href: "#contact" },
                 ].map((item, i) => (
