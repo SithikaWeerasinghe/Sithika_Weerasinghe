@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 
 const POVS = [
@@ -41,9 +41,112 @@ const POVS = [
   },
 ];
 
+// Hover-intent delay (ms) before a hovered POV button activates — long enough
+// that a quick cursor pass-through doesn't switch, short enough to feel live.
+const HOVER_DELAY = 110;
+
+/** One POV selector button. Brighter text + a faint underline on hover so
+ *  inactive options feel interactive before they activate. */
+function POVButton({
+  pov,
+  isActive,
+  onSelect,
+  onHoverStart,
+  onHoverEnd,
+}: {
+  pov: (typeof POVS)[number];
+  isActive: boolean;
+  onSelect: () => void;
+  onHoverStart: () => void;
+  onHoverEnd: () => void;
+}) {
+  const [hover, setHover] = useState(false);
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      onMouseEnter={() => {
+        setHover(true);
+        onHoverStart();
+      }}
+      onMouseLeave={() => {
+        setHover(false);
+        onHoverEnd();
+      }}
+      // Keyboard users: mirror the hover visual on focus, but never auto-switch
+      // on focus — activation stays on Enter/Space (click) for predictability.
+      onFocus={() => setHover(true)}
+      onBlur={() => setHover(false)}
+      className="flex items-center gap-2 pb-2.5 transition-all duration-200"
+      style={{
+        borderBottom: isActive
+          ? "1.5px solid var(--color-brand)"
+          : hover
+          ? "1.5px solid rgba(255,255,255,0.2)"
+          : "1.5px solid transparent",
+        color: isActive
+          ? "rgba(255,255,255,0.95)"
+          : hover
+          ? "rgba(255,255,255,0.8)"
+          : "rgba(255,255,255,0.55)",
+        cursor: "pointer",
+      }}
+    >
+      <span
+        className="flex-shrink-0 transition-colors duration-200"
+        style={{
+          color: isActive
+            ? "var(--color-brand)"
+            : hover
+            ? "rgba(255,255,255,0.7)"
+            : "rgba(255,255,255,0.45)",
+        }}
+      >
+        {pov.icon}
+      </span>
+      <span
+        className="text-sm font-medium transition-colors duration-200"
+        style={{ fontFamily: "var(--font-sans)" }}
+      >
+        {pov.label}
+      </span>
+    </button>
+  );
+}
+
 export function About() {
   const [active, setActive] = useState(0);
   const pov = POVS[active];
+
+  // Hover-intent timer so a quick cursor pass-through doesn't switch tabs.
+  const hoverTimer = useRef<number | null>(null);
+  const clearHoverTimer = () => {
+    if (hoverTimer.current !== null) {
+      window.clearTimeout(hoverTimer.current);
+      hoverTimer.current = null;
+    }
+  };
+  useEffect(() => clearHoverTimer, []);
+
+  // Click (and keyboard Enter/Space) — immediate, cancels any pending hover.
+  const select = (i: number) => {
+    clearHoverTimer();
+    setActive(i);
+  };
+
+  // Hover-to-activate, gated to real hover + fine-pointer devices so touch
+  // tablets/phones keep tap-to-select. The short delay debounces fly-overs.
+  const onHoverStart = (i: number) => {
+    if (
+      typeof window === "undefined" ||
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    ) {
+      return;
+    }
+    clearHoverTimer();
+    hoverTimer.current = window.setTimeout(() => setActive(i), HOVER_DELAY);
+  };
 
   return (
     <section
@@ -127,34 +230,14 @@ export function About() {
           {/* Horizontal tabs */}
           <div className="flex items-center gap-7">
             {POVS.map((p, i) => (
-              <button
+              <POVButton
                 key={p.id}
-                onClick={() => setActive(i)}
-                className="flex items-center gap-2 pb-2.5 transition-all duration-200"
-                style={{
-                  borderBottom: active === i
-                    ? "1.5px solid var(--color-brand)"
-                    : "1.5px solid transparent",
-                  color: active === i
-                    ? "rgba(255,255,255,0.95)"
-                    : "rgba(255,255,255,0.55)",
-                }}
-              >
-                <span
-                  className="flex-shrink-0 transition-colors duration-200"
-                  style={{
-                    color: active === i ? "var(--color-brand)" : "rgba(255,255,255,0.45)",
-                  }}
-                >
-                  {p.icon}
-                </span>
-                <span
-                  className="text-sm font-medium transition-colors duration-200"
-                  style={{ fontFamily: "var(--font-sans)" }}
-                >
-                  {p.label}
-                </span>
-              </button>
+                pov={p}
+                isActive={active === i}
+                onSelect={() => select(i)}
+                onHoverStart={() => onHoverStart(i)}
+                onHoverEnd={clearHoverTimer}
+              />
             ))}
           </div>
 

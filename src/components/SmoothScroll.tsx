@@ -25,11 +25,14 @@ export function SmoothScroll() {
     if (prefersReduced) return;
 
     const lenis = new Lenis({
-      duration: 1.1,
-      // Gentle exponential ease-out — premium, not floaty.
+      // Shorter settle time = more responsive, less glide. Each wheel/trackpad
+      // input resolves quicker so motion tracks the input per-pixel instead of
+      // floating to a stop. Still eased (not native), so it stays premium.
+      duration: 0.9,
+      // Same gentle exponential ease-out curve — keeps the premium feel.
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      wheelMultiplier: 1,
+      wheelMultiplier: 1, // 1:1 wheel mapping — precise, not jumpy
       touchMultiplier: 1.6,
     });
 
