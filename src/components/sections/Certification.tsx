@@ -30,7 +30,8 @@ const CERTS: Cert[] = [
     provider: "Cisco Networking Academy",
     category: "Cybersecurity",
     date: "Dec 2025",
-    credentialUrl: "#",
+    credentialUrl:
+      "https://www.linkedin.com/posts/sithika-weerasinghe_successfully-completed-ethical-hacker-offered-share-7409899260785360896-yxZV/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAErbX54BiB7gqRBd9W5BpMzvK1o8j_SPRiw",
   },
   {
     id: "05",
@@ -38,7 +39,8 @@ const CERTS: Cert[] = [
     provider: "Cisco Networking Academy",
     category: "Data Science",
     date: "Dec 2025",
-    credentialUrl: "#",
+    credentialUrl:
+      "https://www.linkedin.com/posts/sithika-weerasinghe_cisconetworkingacademy-introductiontodatascience-share-7411684256487444480-m0Uf/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAErbX54BiB7gqRBd9W5BpMzvK1o8j_SPRiw",
   },
   {
     id: "04",
@@ -46,7 +48,8 @@ const CERTS: Cert[] = [
     provider: "Cisco Networking Academy",
     category: "Cybersecurity",
     date: "Dec 2025",
-    credentialUrl: "#",
+    credentialUrl:
+      "https://www.linkedin.com/posts/sithika-weerasinghe_cisconetworkingacademy-introductiontocybersecurity-share-7411685231549833216-1lu3/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAErbX54BiB7gqRBd9W5BpMzvK1o8j_SPRiw",
   },
   {
     id: "03",
@@ -54,7 +57,8 @@ const CERTS: Cert[] = [
     provider: "Cisco Networking Academy",
     category: "Artificial Intelligence",
     date: "Dec 2025",
-    credentialUrl: "#",
+    credentialUrl:
+      "https://www.linkedin.com/posts/sithika-weerasinghe_cisconetworkingacademy-introductiontomodernai-share-7411686288216662016--f4Y/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAErbX54BiB7gqRBd9W5BpMzvK1o8j_SPRiw",
   },
   {
     id: "02",
@@ -62,7 +66,8 @@ const CERTS: Cert[] = [
     provider: "Alison",
     category: "Education Technology",
     date: "Oct 2025",
-    credentialUrl: "#",
+    credentialUrl:
+      "https://www.linkedin.com/posts/sithika-weerasinghe_digitalpublishing-elearning-continuingeducation-share-7383095839847661568-H6_W/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAErbX54BiB7gqRBd9W5BpMzvK1o8j_SPRiw",
   },
   {
     id: "01",
@@ -70,7 +75,8 @@ const CERTS: Cert[] = [
     provider: "Google",
     category: "Digital Marketing",
     date: "Oct 2025",
-    credentialUrl: "#",
+    credentialUrl:
+      "https://www.linkedin.com/posts/sithika-weerasinghe_fundamentals-of-digital-marketing-course-share-7381725275803361280--XD4/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAErbX54BiB7gqRBd9W5BpMzvK1o8j_SPRiw",
   },
 ];
 
