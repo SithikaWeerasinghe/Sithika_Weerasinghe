@@ -1,13 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import {
-  motion,
-  AnimatePresence,
-  useScroll,
-  useMotionValueEvent,
-  useTransform,
-} from "motion/react";
+import { useState, type ReactNode } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import Image from "next/image";
 
 type Project = {
   id: string;
@@ -20,6 +15,12 @@ type Project = {
   stack: string[];
   live: string | null;
   github: string | null;
+  /**
+   * Screenshots for the slider. Drop files in `public/projects/` and list
+   * their paths here, e.g. ["/projects/adorix-1.png", "/projects/adorix-2.png"].
+   * Leave empty to show the "screenshot coming soon" placeholder frame.
+   */
+  images: string[];
 };
 
 const PROJECTS: Project[] = [
@@ -45,6 +46,7 @@ const PROJECTS: Project[] = [
     ],
     live: "https://adorixit.com",
     github: "https://github.com/ADORIX000/Adorix-project",
+    images: [],
   },
   {
     id: "02",
@@ -58,6 +60,7 @@ const PROJECTS: Project[] = [
     stack: [],
     live: null,
     github: null,
+    images: [],
   },
   {
     id: "03",
@@ -80,6 +83,7 @@ const PROJECTS: Project[] = [
     ],
     live: "https://www.apexfled.com",
     github: "https://github.com/SithikaWeerasinghe/digital-account-store",
+    images: [],
   },
   {
     id: "04",
@@ -100,6 +104,7 @@ const PROJECTS: Project[] = [
     ],
     live: null,
     github: "https://github.com/SithikaWeerasinghe/Gras-Restaurant",
+    images: [],
   },
   {
     id: "05",
@@ -113,10 +118,12 @@ const PROJECTS: Project[] = [
     stack: ["Python", "PyTorch", "TorchVision", "OpenCV", "NumPy", "ResNet18"],
     live: null,
     github: null,
+    images: [],
   },
 ];
 
 const EASE = [0.22, 1, 0.36, 1] as const;
+const pad2 = (n: number) => String(n).padStart(2, "0");
 
 /* ─────────────────────────  Shared small pieces  ───────────────────────── */
 
@@ -171,6 +178,74 @@ const ArrowGlyph = () => (
     />
   </svg>
 );
+
+const Chevron = ({ to }: { to: "left" | "right" }) => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path
+      d={to === "left" ? "M15 6l-6 6 6 6" : "M9 6l6 6-6 6"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+/** Glass circular button used by both the project nav and the screenshot slider. */
+function RoundIconButton({
+  onClick,
+  disabled,
+  label,
+  children,
+  size = 42,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  label: string;
+  children: ReactNode;
+  size?: number;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      style={{
+        width: size,
+        height: size,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: "9999px",
+        border: "1px solid rgba(255,255,255,0.12)",
+        background: "rgba(255,255,255,0.03)",
+        color: disabled ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.7)",
+        cursor: disabled ? "not-allowed" : "pointer",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+        transition:
+          "color 0.25s ease, border-color 0.25s ease, background 0.25s ease, transform 0.25s ease",
+      }}
+      onMouseEnter={(e) => {
+        if (disabled) return;
+        e.currentTarget.style.color = "#ffffff";
+        e.currentTarget.style.borderColor = "rgba(53,105,226,0.5)";
+        e.currentTarget.style.background = "rgba(53,105,226,0.1)";
+        e.currentTarget.style.transform = "translateY(-1px)";
+      }}
+      onMouseLeave={(e) => {
+        if (disabled) return;
+        e.currentTarget.style.color = "rgba(255,255,255,0.7)";
+        e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
+        e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+        e.currentTarget.style.transform = "translateY(0)";
+      }}
+    >
+      {children}
+    </button>
+  );
+}
 
 function DisabledPill({ label }: { label: string }) {
   return (
@@ -271,510 +346,602 @@ function ProjectLinks({ project }: { project: Project }) {
   );
 }
 
-/* ─────────────────────────  Detail panel (desktop)  ───────────────────────── */
+/* ─────────────────────────  Screenshot slider  ───────────────────────── */
 
-function DetailPanel({ project }: { project: Project }) {
-  // The panel (stable across project swaps) owns the wheel listener; the inner
-  // body remounts on every project change, so we track its current node here.
-  const panelRef = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
+const slideVariants = {
+  enter: (d: number) => ({ opacity: 0, x: d > 0 ? "6%" : "-6%", scale: 1.02 }),
+  center: { opacity: 1, x: "0%", scale: 1 },
+  exit: (d: number) => ({ opacity: 0, x: d > 0 ? "-6%" : "6%", scale: 1.02 }),
+};
 
-  // Nested scroll, Lenis-aware.
-  //
-  // Lenis runs a wheel listener on `window` and lerps the whole page (that is
-  // what drives the pinned project progression). The panel sits *below* window
-  // in the DOM, so its wheel listener fires first during bubbling — which lets
-  // us decide, per event, who gets the scroll:
-  //
-  //   • Inner body still has room to move in the wheel's direction →
-  //     preventDefault() (block native) + stopPropagation() (block Lenis) and
-  //     scroll the description ourselves. The section stays put.
-  //   • Inner body is at the top/bottom edge (or has nothing to scroll) →
-  //     let the event bubble untouched to Lenis → the page scrolls and the
-  //     project advances.
-  //
-  // So the panel only "captures" while there is something left to read, and
-  // releases the instant it hits an edge — a nested scroll area, never a trap.
-  // It is naturally hover-gated: the listener only fires while the cursor is
-  // over the panel; elsewhere the page scrolls normally.
-  useEffect(() => {
-    const panel = panelRef.current;
-    if (!panel) return;
+function ScreenshotFrame({ project }: { project: Project }) {
+  // Each project's slider keeps its own image index + slide direction.
+  const [[index, dir], setIndex] = useState<[number, number]>([0, 0]);
+  const images = project.images;
+  const count = images.length;
+  const multiple = count > 1;
 
-    const onWheel = (e: WheelEvent) => {
-      if (e.deltaY === 0) return; // ignore horizontal / zero ticks
-      const node = scrollRef.current;
-      if (!node) return; // mid project-swap → let the page scroll
+  const paginate = (delta: number) => {
+    if (!multiple) return;
+    setIndex(([i]) => [(i + delta + count) % count, delta]);
+  };
+  const goTo = (i: number) =>
+    setIndex(([cur]) => [i, i > cur ? 1 : -1]);
 
-      const canScroll = node.scrollHeight > node.clientHeight + 1;
-      if (!canScroll) return; // nothing to read → release to the section
-
-      const atTop = node.scrollTop <= 0;
-      const atBottom =
-        node.scrollTop + node.clientHeight >= node.scrollHeight - 1;
-      const goingDown = e.deltaY > 0;
-
-      // Room left in this direction → keep the scroll inside the panel.
-      if ((goingDown && !atBottom) || (!goingDown && !atTop)) {
-        e.preventDefault(); // hold native page scroll
-        e.stopPropagation(); // hold Lenis → section does not advance
-        node.scrollTop += e.deltaY;
-      }
-      // else: at an edge → fall through to Lenis → prev/next project
-    };
-
-    // Non-passive so preventDefault() can hold the page scroll.
-    panel.addEventListener("wheel", onWheel, { passive: false });
-    return () => panel.removeEventListener("wheel", onWheel);
-  }, []);
+  const host = project.live
+    ? project.live.replace(/^https?:\/\//, "").replace(/\/$/, "")
+    : `${project.title.toLowerCase().replace(/\s+/g, "")}.preview`;
 
   return (
-    <div
-      ref={panelRef}
-      className="relative h-full w-full overflow-hidden"
-      style={{
-        borderRadius: "20px",
-        background: "rgba(255,255,255,0.02)",
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
-        border: "1px solid rgba(255,255,255,0.07)",
-        padding: "clamp(2rem, 3vw, 3.2rem)",
-      }}
-    >
-      {/* Soft blue glow inside the panel */}
+    <div className="relative">
+      {/* Soft glow behind the frame for depth */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute -inset-6 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 70% 55% at 100% 0%, rgba(53,105,226,0.08) 0%, transparent 60%)",
+            "radial-gradient(ellipse 60% 60% at 50% 40%, rgba(53,105,226,0.12) 0%, transparent 70%)",
+          filter: "blur(8px)",
         }}
       />
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={project.id}
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -12 }}
-          transition={{ duration: 0.62, ease: EASE }}
-          className="relative flex flex-col h-full"
+      {/* Browser-style frame */}
+      <div
+        className="relative"
+        style={{
+          borderRadius: "16px",
+          border: "1px solid rgba(255,255,255,0.09)",
+          background: "rgba(255,255,255,0.02)",
+          overflow: "hidden",
+          boxShadow: "0 30px 70px -30px rgba(0,0,0,0.7)",
+        }}
+      >
+        {/* Chrome bar */}
+        <div
+          className="flex items-center gap-3"
+          style={{
+            padding: "0.7rem 1rem",
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            background: "rgba(255,255,255,0.02)",
+          }}
         >
-          {/* ── Header (fixed) ── */}
-          <div className="flex-shrink-0">
-            {/* Eyebrow label */}
+          <div className="flex items-center gap-1.5">
+            {[0, 1, 2].map((d) => (
+              <span
+                key={d}
+                style={{
+                  width: 9,
+                  height: 9,
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.14)",
+                }}
+              />
+            ))}
+          </div>
+          <div className="flex-1 flex justify-center">
             <span
-              className="block mb-5"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "0.56rem",
+                letterSpacing: "0.08em",
+                color: "rgba(255,255,255,0.32)",
+                padding: "0.18rem 0.85rem",
+                borderRadius: "9999px",
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.05)",
+                maxWidth: "70%",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {host}
+            </span>
+          </div>
+          {/* Spacer to balance the dots */}
+          <div style={{ width: 39 }} />
+        </div>
+
+        {/* Image stage */}
+        <div
+          className="relative w-full overflow-hidden"
+          style={{ aspectRatio: "16 / 10", background: "#050608" }}
+        >
+          {count > 0 ? (
+            <AnimatePresence initial={false} custom={dir}>
+              <motion.div
+                key={index}
+                custom={dir}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.5, ease: EASE }}
+                className="absolute inset-0"
+              >
+                <Image
+                  src={images[index]}
+                  alt={`${project.title} screenshot ${index + 1}`}
+                  fill
+                  sizes="(max-width: 1024px) 92vw, 48vw"
+                  style={{ objectFit: "cover" }}
+                  draggable={false}
+                />
+              </motion.div>
+            </AnimatePresence>
+          ) : (
+            <ScreenshotPlaceholder project={project} />
+          )}
+
+          {/* Top sheen */}
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0"
+            style={{
+              height: "30%",
+              background:
+                "linear-gradient(to bottom, rgba(255,255,255,0.04), transparent)",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Controls — only when there is more than one screenshot to slide */}
+      {multiple && (
+        <div
+          className="flex items-center justify-between"
+          style={{ marginTop: "1.1rem" }}
+        >
+          {/* Dots */}
+          <div className="flex items-center gap-2">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goTo(i)}
+                aria-label={`Go to screenshot ${i + 1}`}
+                style={{
+                  width: i === index ? 22 : 7,
+                  height: 7,
+                  borderRadius: "9999px",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  background:
+                    i === index ? "var(--color-brand)" : "rgba(255,255,255,0.18)",
+                  transition: "width 0.35s ease, background 0.35s ease",
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Counter + arrows */}
+          <div className="flex items-center gap-3">
+            <span
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: "0.6rem",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "var(--color-brand)",
+                letterSpacing: "0.12em",
+                color: "rgba(255,255,255,0.4)",
               }}
             >
-              {project.label}
+              {pad2(index + 1)}
+              <span style={{ color: "rgba(255,255,255,0.2)" }}>
+                {" "}
+                / {pad2(count)}
+              </span>
             </span>
-
-            {/* Title */}
-            <h3
-              className="font-extrabold text-white"
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "clamp(2.2rem, 3.2vw, 3.3rem)",
-                letterSpacing: "-0.03em",
-                lineHeight: 1.02,
-                marginBottom: "0.9rem",
-              }}
+            <RoundIconButton
+              onClick={() => paginate(-1)}
+              label="Previous screenshot"
+              size={38}
             >
-              {project.title}
-            </h3>
-
-            {/* Meta row — status chip + type */}
-            <div className="flex items-center gap-3 flex-wrap" style={{ marginBottom: "1.6rem" }}>
-              <span
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "0.55rem",
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  color: "var(--color-brand)",
-                  padding: "3px 9px",
-                  borderRadius: "9999px",
-                  background: "rgba(53,105,226,0.1)",
-                  border: "1px solid rgba(53,105,226,0.22)",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {project.status}
-              </span>
-              <span
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "0.6rem",
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.32)",
-                }}
-              >
-                {project.type}
-              </span>
-            </div>
-          </div>
-
-          {/* ── Scrollable body ── */}
-          <div className="relative flex-1 min-h-0">
-            <div
-              ref={scrollRef}
-              className="premium-scroll h-full overflow-y-auto pr-3"
-              style={{
-                paddingBottom: "2.75rem",
-                // Belt-and-suspenders: stop any native scroll from chaining to
-                // the page. Lenis (handled in JS above) is unaffected by this.
-                overscrollBehavior: "contain",
-              }}
+              <Chevron to="left" />
+            </RoundIconButton>
+            <RoundIconButton
+              onClick={() => paginate(1)}
+              label="Next screenshot"
+              size={38}
             >
-              {/* Description */}
-              <p
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "clamp(0.95rem, 1.1vw, 1.08rem)",
-                  lineHeight: 1.75,
-                  color: "rgba(255,255,255,0.82)",
-                  marginBottom: "1.9rem",
-                  maxWidth: "50ch",
-                }}
-              >
-                {project.description}
-              </p>
-
-              {/* Role */}
-              <div className="mb-7">
-                <span
-                  style={{
-                    display: "block",
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "0.56rem",
-                    letterSpacing: "0.2em",
-                    textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.3)",
-                    marginBottom: "0.55rem",
-                  }}
-                >
-                  My Role
-                </span>
-                <p
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "0.88rem",
-                    lineHeight: 1.6,
-                    color: "rgba(255,255,255,0.55)",
-                    maxWidth: "50ch",
-                  }}
-                >
-                  {project.role}
-                </p>
-              </div>
-
-              {/* Stack */}
-              <div>
-                <span
-                  style={{
-                    display: "block",
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "0.56rem",
-                    letterSpacing: "0.2em",
-                    textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.3)",
-                    marginBottom: "0.85rem",
-                  }}
-                >
-                  Tech Stack
-                </span>
-                <StackTags stack={project.stack} />
-              </div>
-            </div>
-
-            {/* Bottom fade — hints at more scrollable content */}
-            <div
-              className="pointer-events-none absolute bottom-0 left-0 right-0"
-              style={{
-                height: "2.5rem",
-                background:
-                  "linear-gradient(to bottom, transparent, rgba(4,5,8,0.9))",
-              }}
-            />
+              <Chevron to="right" />
+            </RoundIconButton>
           </div>
-
-          {/* ── Footer (pinned) — action buttons ── */}
-          <div
-            className="flex-shrink-0"
-            style={{
-              marginTop: "1.4rem",
-              paddingTop: "1.4rem",
-              borderTop: "1px solid rgba(255,255,255,0.06)",
-            }}
-          >
-            <ProjectLinks project={project} />
-          </div>
-        </motion.div>
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }
 
-/* ─────────────────────────  Desktop pinned experience  ───────────────────────── */
+function ScreenshotPlaceholder({ project }: { project: Project }) {
+  return (
+    <div
+      className="absolute inset-0 flex flex-col items-center justify-center"
+      style={{
+        background:
+          "radial-gradient(ellipse 80% 80% at 50% 40%, rgba(53,105,226,0.07) 0%, transparent 65%)",
+      }}
+    >
+      {/* Faint title watermark */}
+      <span
+        aria-hidden="true"
+        className="absolute select-none font-extrabold"
+        style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "clamp(3rem, 8vw, 6rem)",
+          letterSpacing: "-0.04em",
+          color: "rgba(255,255,255,0.035)",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {project.title}
+      </span>
+
+      <svg
+        width="34"
+        height="34"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden="true"
+        style={{ marginBottom: "0.9rem", opacity: 0.5 }}
+      >
+        <rect
+          x="3"
+          y="5"
+          width="18"
+          height="14"
+          rx="2"
+          stroke="var(--color-brand)"
+          strokeWidth="1.3"
+        />
+        <circle cx="8" cy="10" r="1.6" stroke="var(--color-brand)" strokeWidth="1.3" />
+        <path
+          d="M3 16l5-4 4 3 3-2 6 5"
+          stroke="var(--color-brand)"
+          strokeWidth="1.3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <span
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: "0.58rem",
+          letterSpacing: "0.22em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.4)",
+        }}
+      >
+        Screenshot coming soon
+      </span>
+    </div>
+  );
+}
+
+/* ─────────────────────────  Readable info panel  ───────────────────────── */
+
+function ProjectInfo({ project }: { project: Project }) {
+  return (
+    <div className="flex flex-col">
+      {/* Eyebrow label */}
+      <span
+        className="block mb-4"
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: "0.62rem",
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          color: "var(--color-brand)",
+        }}
+      >
+        {project.label}
+      </span>
+
+      {/* Title */}
+      <h3
+        className="font-extrabold text-white"
+        style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "clamp(2.4rem, 3.4vw, 3.6rem)",
+          letterSpacing: "-0.03em",
+          lineHeight: 1.02,
+          marginBottom: "1rem",
+        }}
+      >
+        {project.title}
+      </h3>
+
+      {/* Meta row */}
+      <div
+        className="flex items-center gap-3 flex-wrap"
+        style={{ marginBottom: "1.7rem" }}
+      >
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "0.55rem",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "var(--color-brand)",
+            padding: "3px 9px",
+            borderRadius: "9999px",
+            background: "rgba(53,105,226,0.1)",
+            border: "1px solid rgba(53,105,226,0.22)",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {project.status}
+        </span>
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "0.6rem",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.34)",
+          }}
+        >
+          {project.type}
+        </span>
+      </div>
+
+      {/* Description — large, high contrast, fully visible */}
+      <p
+        style={{
+          fontFamily: "var(--font-sans)",
+          fontSize: "clamp(1.05rem, 1.2vw, 1.22rem)",
+          lineHeight: 1.75,
+          color: "rgba(255,255,255,0.86)",
+          marginBottom: "2rem",
+          maxWidth: "52ch",
+        }}
+      >
+        {project.description}
+      </p>
+
+      {/* Role */}
+      <div className="mb-7">
+        <span
+          style={{
+            display: "block",
+            fontFamily: "var(--font-mono)",
+            fontSize: "0.56rem",
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.3)",
+            marginBottom: "0.6rem",
+          }}
+        >
+          My Role
+        </span>
+        <p
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "0.95rem",
+            lineHeight: 1.65,
+            color: "rgba(255,255,255,0.6)",
+            maxWidth: "52ch",
+          }}
+        >
+          {project.role}
+        </p>
+      </div>
+
+      {/* Stack */}
+      <div className="mb-8">
+        <span
+          style={{
+            display: "block",
+            fontFamily: "var(--font-mono)",
+            fontSize: "0.56rem",
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.3)",
+            marginBottom: "0.85rem",
+          }}
+        >
+          Tech Stack
+        </span>
+        <StackTags stack={project.stack} />
+      </div>
+
+      <ProjectLinks project={project} />
+    </div>
+  );
+}
+
+/* ─────────────────────────  Desktop cinematic showcase  ───────────────────────── */
+
+const panelVariants = {
+  enter: (d: number) => ({ opacity: 0, x: d >= 0 ? 48 : -48 }),
+  center: { opacity: 1, x: 0 },
+  exit: (d: number) => ({ opacity: 0, x: d >= 0 ? -48 : 48 }),
+};
 
 function ProjectsDesktop() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(0);
+  const [[active, dir], setActive] = useState<[number, number]>([0, 0]);
   const count = PROJECTS.length;
+  const project = PROJECTS[active];
 
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end end"],
-  });
-
-  // Map scroll progress → active project index
-  useMotionValueEvent(scrollYProgress, "change", (p) => {
-    const next = Math.min(count - 1, Math.max(0, Math.floor(p * count)));
-    setActive((prev) => (prev === next ? prev : next));
-  });
-
-  // Vertical progress bar fill
-  const progressScaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
-
-  // Click a title → scroll to the middle of that project's segment
-  const scrollToIndex = (i: number) => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const scrollable = el.offsetHeight - window.innerHeight;
-    const target = el.offsetTop + (scrollable * (i + 0.5)) / count;
-    window.scrollTo({ top: target, behavior: "smooth" });
-  };
+  const go = (i: number) => setActive(([cur]) => [i, i > cur ? 1 : -1]);
+  const paginate = (delta: number) =>
+    setActive(([cur]) => [(cur + delta + count) % count, delta]);
 
   return (
     <div
-      ref={sectionRef}
-      className="relative hidden lg:block"
-      style={{ height: `${count * 118}vh` }}
+      className="relative hidden lg:flex lg:flex-col"
+      style={{
+        minHeight: "100vh",
+        paddingLeft: "clamp(2rem, 5vw, 6rem)",
+        paddingRight: "clamp(2rem, 5vw, 6rem)",
+        paddingTop: "clamp(3.5rem, 7vh, 6rem)",
+        paddingBottom: "clamp(3rem, 6vh, 5rem)",
+      }}
     >
-      {/* Pinned frame */}
-      <div className="sticky top-0 h-screen overflow-hidden flex flex-col">
-        {/* Ambient glow */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 50% 50% at 88% 30%, rgba(53,105,226,0.05) 0%, transparent 70%)",
-          }}
-        />
+      {/* Ambient glow */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 55% 50% at 80% 25%, rgba(53,105,226,0.06) 0%, transparent 70%)",
+        }}
+      />
 
-        {/* Top header bar */}
-        <div
-          className="relative flex items-end justify-between"
-          style={{
-            paddingLeft: "clamp(2rem, 5vw, 6rem)",
-            paddingRight: "clamp(2rem, 5vw, 6rem)",
-            paddingTop: "clamp(2.5rem, 5vh, 4.5rem)",
-          }}
-        >
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-5 h-px" style={{ background: "var(--color-brand)" }} />
-              <span
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "0.6rem",
-                  letterSpacing: "0.28em",
-                  color: "rgba(255,255,255,0.25)",
-                  textTransform: "uppercase",
-                }}
-              >
-                Selected Work
-              </span>
-            </div>
-            <h2
-              className="font-extrabold text-white"
+      {/* ── Header ── */}
+      <div className="relative flex items-end justify-between">
+        <div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-5 h-px" style={{ background: "var(--color-brand)" }} />
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "0.6rem",
+                letterSpacing: "0.28em",
+                color: "rgba(255,255,255,0.25)",
+                textTransform: "uppercase",
+              }}
+            >
+              Selected Work
+            </span>
+          </div>
+          <h2
+            className="font-extrabold text-white"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(2.6rem, 4.5vw, 4rem)",
+              letterSpacing: "-0.04em",
+              lineHeight: 1,
+            }}
+          >
+            Projects.
+          </h2>
+        </div>
+
+        {/* Counter */}
+        <div className="flex items-baseline gap-1.5">
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={project.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35, ease: EASE }}
               style={{
                 fontFamily: "var(--font-display)",
-                fontSize: "clamp(2.4rem, 4.5vw, 4rem)",
-                letterSpacing: "-0.04em",
-                lineHeight: 1,
+                fontSize: "1.7rem",
+                fontWeight: 800,
+                color: "var(--color-brand)",
+                letterSpacing: "-0.02em",
               }}
             >
-              Projects.
-            </h2>
-          </div>
-
-          {/* Counter */}
-          <div className="flex flex-col items-end">
-            <div className="flex items-baseline gap-1">
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={PROJECTS[active].id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.35, ease: EASE }}
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "1.6rem",
-                    fontWeight: 800,
-                    color: "var(--color-brand)",
-                    letterSpacing: "-0.02em",
-                  }}
-                >
-                  {PROJECTS[active].id}
-                </motion.span>
-              </AnimatePresence>
-              <span
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "0.7rem",
-                  color: "rgba(255,255,255,0.2)",
-                }}
-              >
-                / {String(count).padStart(2, "0")}
-              </span>
-            </div>
-
-            {/* Active project label */}
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={PROJECTS[active].id + "-label"}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.35, ease: EASE }}
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "0.55rem",
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.3)",
-                  marginTop: "0.35rem",
-                }}
-              >
-                {PROJECTS[active].title}
-              </motion.span>
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* Main two-column area */}
-        <div
-          className="relative flex-1 grid items-center"
-          style={{
-            gridTemplateColumns: "1fr 1fr",
-            gap: "clamp(2rem, 5vw, 6rem)",
-            paddingLeft: "clamp(2rem, 5vw, 6rem)",
-            paddingRight: "clamp(2rem, 5vw, 6rem)",
-            paddingBottom: "clamp(2rem, 4vh, 3.5rem)",
-          }}
-        >
-          {/* LEFT — project list */}
-          <div className="flex items-center gap-7 h-full">
-            {/* Progress rail */}
-            <div
-              className="relative flex-shrink-0"
-              style={{
-                width: "2px",
-                height: "62%",
-                background: "rgba(255,255,255,0.06)",
-                borderRadius: "2px",
-              }}
-            >
-              <motion.div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  background: "var(--color-brand)",
-                  borderRadius: "2px",
-                  transformOrigin: "top",
-                  scaleY: progressScaleY,
-                }}
-              />
-            </div>
-
-            {/* Titles */}
-            <ul className="flex flex-col gap-5 xl:gap-7">
-              {PROJECTS.map((p, i) => {
-                const isActive = i === active;
-                return (
-                  <li key={p.id}>
-                    <button
-                      onClick={() => scrollToIndex(i)}
-                      className="group flex items-center gap-5 text-left"
-                      style={{ cursor: "pointer" }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: "var(--font-mono)",
-                          fontSize: "0.7rem",
-                          letterSpacing: "0.1em",
-                          color: isActive
-                            ? "var(--color-brand)"
-                            : "rgba(255,255,255,0.2)",
-                          transition: "color 0.4s ease",
-                          width: "1.8rem",
-                          flexShrink: 0,
-                        }}
-                      >
-                        {p.id}
-                      </span>
-                      <span
-                        className="font-extrabold"
-                        style={{
-                          fontFamily: "var(--font-display)",
-                          fontSize: isActive
-                            ? "clamp(2rem, 3vw, 2.9rem)"
-                            : "clamp(1.8rem, 2.6vw, 2.5rem)",
-                          letterSpacing: "-0.03em",
-                          lineHeight: 1.05,
-                          color: isActive ? "#ffffff" : "rgba(255,255,255,0.34)",
-                          transform: isActive
-                            ? "translateX(5px)"
-                            : "translateX(0)",
-                          transition:
-                            "color 0.55s cubic-bezier(0.22,1,0.36,1), font-size 0.55s cubic-bezier(0.22,1,0.36,1), transform 0.55s cubic-bezier(0.22,1,0.36,1)",
-                          display: "inline-block",
-                        }}
-                      >
-                        {p.title}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-
-          {/* RIGHT — detail panel */}
-          <div className="h-[70%] max-h-[640px] min-h-[440px]">
-            <DetailPanel project={PROJECTS[active]} />
-          </div>
-        </div>
-
-        {/* Scroll hint */}
-        <div
-          className="relative flex items-center justify-center gap-3"
-          style={{ paddingBottom: "clamp(1.5rem, 3vh, 2.5rem)" }}
-        >
+              {project.id}
+            </motion.span>
+          </AnimatePresence>
           <span
             style={{
               fontFamily: "var(--font-mono)",
-              fontSize: "0.55rem",
-              letterSpacing: "0.25em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.18)",
+              fontSize: "0.7rem",
+              color: "rgba(255,255,255,0.2)",
             }}
           >
-            {active < count - 1 ? "Scroll to explore" : "End of showcase"}
+            / {pad2(count)}
           </span>
         </div>
+      </div>
+
+      {/* ── Tabs + arrows ── */}
+      <div
+        className="relative flex items-center justify-between gap-5 flex-wrap"
+        style={{
+          marginTop: "clamp(1.8rem, 3.5vh, 3rem)",
+          marginBottom: "clamp(1.8rem, 3.5vh, 3rem)",
+          paddingBottom: "clamp(1.2rem, 2.5vh, 2rem)",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+        }}
+      >
+        <ul className="flex items-center gap-2.5 flex-wrap">
+          {PROJECTS.map((p, i) => {
+            const isActive = i === active;
+            return (
+              <li key={p.id}>
+                <button
+                  onClick={() => go(i)}
+                  className="group inline-flex items-center gap-2.5"
+                  style={{
+                    padding: "0.5rem 0.95rem",
+                    borderRadius: "9999px",
+                    border: isActive
+                      ? "1px solid rgba(53,105,226,0.5)"
+                      : "1px solid rgba(255,255,255,0.08)",
+                    background: isActive
+                      ? "rgba(53,105,226,0.1)"
+                      : "rgba(255,255,255,0.02)",
+                    cursor: "pointer",
+                    transition: "all 0.35s cubic-bezier(0.22,1,0.36,1)",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "0.6rem",
+                      letterSpacing: "0.1em",
+                      color: isActive
+                        ? "var(--color-brand)"
+                        : "rgba(255,255,255,0.3)",
+                      transition: "color 0.35s ease",
+                    }}
+                  >
+                    {p.id}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-display)",
+                      fontSize: "0.82rem",
+                      fontWeight: 600,
+                      letterSpacing: "-0.01em",
+                      color: isActive ? "#ffffff" : "rgba(255,255,255,0.45)",
+                      transition: "color 0.35s ease",
+                    }}
+                  >
+                    {p.title}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <RoundIconButton onClick={() => paginate(-1)} label="Previous project">
+            <Chevron to="left" />
+          </RoundIconButton>
+          <RoundIconButton onClick={() => paginate(1)} label="Next project">
+            <Chevron to="right" />
+          </RoundIconButton>
+        </div>
+      </div>
+
+      {/* ── Showcase ── */}
+      <div className="relative flex-1 flex items-center">
+        <AnimatePresence mode="wait" custom={dir}>
+          <motion.div
+            key={project.id}
+            custom={dir}
+            variants={panelVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.5, ease: EASE }}
+            className="grid w-full items-center"
+            style={{
+              gridTemplateColumns: "minmax(0, 1.05fr) minmax(0, 0.95fr)",
+              gap: "clamp(2.5rem, 5vw, 5rem)",
+            }}
+          >
+            {/* LEFT — screenshot slider */}
+            <ScreenshotFrame project={project} />
+
+            {/* RIGHT — readable info */}
+            <ProjectInfo project={project} />
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -829,7 +996,7 @@ function ProjectsMobile() {
       </motion.div>
 
       {/* Stacked cards */}
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-6">
         {PROJECTS.map((p, i) => (
           <motion.article
             key={p.id}
@@ -841,10 +1008,15 @@ function ProjectsMobile() {
               borderRadius: "16px",
               background: "rgba(255,255,255,0.02)",
               border: "1px solid rgba(255,255,255,0.07)",
-              padding: "clamp(1.5rem, 6vw, 2.2rem)",
+              padding: "clamp(1.25rem, 5vw, 1.8rem)",
             }}
           >
-            <div className="flex items-center justify-between mb-5">
+            {/* Screenshot slider */}
+            <div className="mb-6">
+              <ScreenshotFrame project={p} />
+            </div>
+
+            <div className="flex items-center justify-between mb-4">
               <span
                 style={{
                   fontFamily: "var(--font-mono)",
@@ -900,9 +1072,9 @@ function ProjectsMobile() {
             <p
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: "0.92rem",
-                lineHeight: 1.65,
-                color: "rgba(255,255,255,0.68)",
+                fontSize: "1rem",
+                lineHeight: 1.7,
+                color: "rgba(255,255,255,0.82)",
                 marginBottom: "1.5rem",
               }}
             >
@@ -926,9 +1098,9 @@ function ProjectsMobile() {
               <p
                 style={{
                   fontFamily: "var(--font-sans)",
-                  fontSize: "0.82rem",
-                  lineHeight: 1.55,
-                  color: "rgba(255,255,255,0.52)",
+                  fontSize: "0.85rem",
+                  lineHeight: 1.6,
+                  color: "rgba(255,255,255,0.55)",
                 }}
               >
                 {p.role}
