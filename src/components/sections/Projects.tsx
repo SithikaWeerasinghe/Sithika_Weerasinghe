@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
 
@@ -124,6 +124,10 @@ const PROJECTS: Project[] = [
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const pad2 = (n: number) => String(n).padStart(2, "0");
+
+// Hover-intent delay (ms) before a hovered tab activates — long enough that a
+// quick cursor pass-through doesn't switch projects, short enough to feel live.
+const HOVER_DELAY = 110;
 
 /* ─────────────────────────  Shared small pieces  ───────────────────────── */
 
@@ -801,18 +805,33 @@ function ProjectTab({
   project,
   isActive,
   onSelect,
+  onHoverStart,
+  onHoverEnd,
 }: {
   project: Project;
   isActive: boolean;
   onSelect: () => void;
+  onHoverStart: () => void;
+  onHoverEnd: () => void;
 }) {
   const [hover, setHover] = useState(false);
 
   return (
     <button
+      type="button"
       onClick={onSelect}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
+      onMouseEnter={() => {
+        setHover(true);
+        onHoverStart();
+      }}
+      onMouseLeave={() => {
+        setHover(false);
+        onHoverEnd();
+      }}
+      // Keyboard users: mirror the hover visual on focus, but never auto-switch
+      // on focus — activation stays on Enter/Space (click) for predictability.
+      onFocus={() => setHover(true)}
+      onBlur={() => setHover(false)}
       className="inline-flex items-center gap-2.5"
       style={{
         padding: "0.5rem 0.95rem",
@@ -871,9 +890,43 @@ function ProjectsDesktop() {
   const count = PROJECTS.length;
   const project = PROJECTS[active];
 
-  const go = (i: number) => setActive(([cur]) => [i, i > cur ? 1 : -1]);
-  const paginate = (delta: number) =>
+  // Hover-intent timer so quick cursor passes don't trigger noisy switching.
+  const hoverTimer = useRef<number | null>(null);
+  const clearHoverTimer = () => {
+    if (hoverTimer.current !== null) {
+      window.clearTimeout(hoverTimer.current);
+      hoverTimer.current = null;
+    }
+  };
+  useEffect(() => clearHoverTimer, []);
+
+  // Direction-aware setter. Returns the previous tuple unchanged when the
+  // target is already active, so React bails out — no re-render, no flicker.
+  const setActiveIndex = (i: number) =>
+    setActive((prev) => (prev[0] === i ? prev : [i, i > prev[0] ? 1 : -1]));
+
+  // Click (and keyboard Enter/Space) — immediate, cancels any pending hover.
+  const go = (i: number) => {
+    clearHoverTimer();
+    setActiveIndex(i);
+  };
+  const paginate = (delta: number) => {
+    clearHoverTimer();
     setActive(([cur]) => [(cur + delta + count) % count, delta]);
+  };
+
+  // Desktop hover-to-activate, gated to real hover + fine-pointer devices so
+  // touch tablets keep tap-to-select. The short delay debounces fly-overs.
+  const onTabHoverStart = (i: number) => {
+    if (
+      typeof window === "undefined" ||
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    ) {
+      return;
+    }
+    clearHoverTimer();
+    hoverTimer.current = window.setTimeout(() => setActiveIndex(i), HOVER_DELAY);
+  };
 
   return (
     <div
@@ -974,6 +1027,8 @@ function ProjectsDesktop() {
                 project={p}
                 isActive={i === active}
                 onSelect={() => go(i)}
+                onHoverStart={() => onTabHoverStart(i)}
+                onHoverEnd={clearHoverTimer}
               />
             </li>
           ))}
