@@ -46,7 +46,10 @@ const PROJECTS: Project[] = [
     ],
     live: "https://adorixit.com",
     github: "https://github.com/ADORIX000/Adorix-project",
-    images: [],
+    images: [
+      "/projects/adorix-platform.png", // Slide 1 — Adorix web platform / hero
+      "/projects/adorix-team.jpg", // Slide 2 — team with the physical kiosk device
+    ],
   },
   {
     id: "02",
@@ -429,61 +432,75 @@ function ScreenshotFrame({ project }: { project: Project }) {
 
   return (
     <div className="relative">
-      {/* Soft glow behind the frame for depth */}
+      {/* Soft cool glow behind the window for cinematic depth */}
       <div
         className="absolute -inset-6 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 60% 60% at 50% 40%, rgba(53,105,226,0.12) 0%, transparent 70%)",
-          filter: "blur(8px)",
+            "radial-gradient(ellipse 60% 60% at 50% 38%, rgba(53,105,226,0.1) 0%, transparent 70%)",
+          filter: "blur(10px)",
         }}
       />
 
-      {/* Browser-style frame */}
+      {/* macOS-style window frame */}
       <div
         className="relative"
         style={{
-          borderRadius: "16px",
-          border: "1px solid rgba(255,255,255,0.09)",
-          background: "rgba(255,255,255,0.02)",
+          borderRadius: "14px",
+          background:
+            "linear-gradient(to bottom, rgba(255,255,255,0.04), rgba(255,255,255,0.015))",
           overflow: "hidden",
-          boxShadow: "0 30px 70px -30px rgba(0,0,0,0.7)",
+          // Layered depth: hairline ring + inset top highlight + a soft ambient
+          // shadow over a tighter contact shadow — premium, not glossy.
+          boxShadow:
+            "0 0 0 1px rgba(255,255,255,0.07), inset 0 1px 0 rgba(255,255,255,0.07), 0 42px 80px -34px rgba(0,0,0,0.8), 0 14px 30px -20px rgba(0,0,0,0.65)",
         }}
       >
-        {/* Chrome bar */}
+        {/* Title bar */}
         <div
           className="flex items-center gap-3"
           style={{
-            padding: "0.7rem 1rem",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
-            background: "rgba(255,255,255,0.02)",
+            padding: "0.72rem 1.1rem",
+            borderBottom: "1px solid rgba(255,255,255,0.05)",
+            background:
+              "linear-gradient(to bottom, rgba(255,255,255,0.035), rgba(255,255,255,0.01))",
           }}
         >
-          <div className="flex items-center gap-1.5">
-            {[0, 1, 2].map((d) => (
+          {/* macOS traffic lights — real hues, slightly muted for the dark
+              theme, with a soft top highlight so they read as glass, not flat. */}
+          <div className="flex items-center" style={{ gap: 8 }}>
+            {[
+              { base: "#ed5049", hi: "#ff8a84" },
+              { base: "#e0a92b", hi: "#ffce5a" },
+              { base: "#1fae3a", hi: "#54da66" },
+            ].map((c, d) => (
               <span
                 key={d}
                 style={{
-                  width: 9,
-                  height: 9,
+                  width: 11,
+                  height: 11,
                   borderRadius: "50%",
-                  background: "rgba(255,255,255,0.14)",
+                  background: `radial-gradient(circle at 32% 30%, ${c.hi}, ${c.base})`,
+                  boxShadow:
+                    "inset 0 0.5px 0.5px rgba(255,255,255,0.45), inset 0 -0.5px 1px rgba(0,0,0,0.25), 0 0 0 0.5px rgba(0,0,0,0.22)",
                 }}
               />
             ))}
           </div>
           <div className="flex-1 flex justify-center">
             <span
+              className="inline-flex items-center"
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: "0.56rem",
-                letterSpacing: "0.08em",
-                color: "rgba(255,255,255,0.32)",
-                padding: "0.18rem 0.85rem",
+                fontSize: "0.58rem",
+                letterSpacing: "0.06em",
+                color: "rgba(255,255,255,0.42)",
+                padding: "0.22rem 0.95rem",
                 borderRadius: "9999px",
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.05)",
-                maxWidth: "70%",
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.07)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+                maxWidth: "72%",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -492,14 +509,18 @@ function ScreenshotFrame({ project }: { project: Project }) {
               {host}
             </span>
           </div>
-          {/* Spacer to balance the dots */}
-          <div style={{ width: 39 }} />
+          {/* Spacer balances the traffic lights so the address stays centered */}
+          <div style={{ width: 49 }} />
         </div>
 
         {/* Image stage */}
         <div
           className="relative w-full overflow-hidden"
-          style={{ aspectRatio: "16 / 10", background: "#050608" }}
+          style={{
+            aspectRatio: "16 / 10",
+            background: "#050608",
+            borderTop: "1px solid rgba(255,255,255,0.04)",
+          }}
         >
           {count > 0 ? (
             <AnimatePresence initial={false} custom={dir}>
@@ -528,14 +549,20 @@ function ScreenshotFrame({ project }: { project: Project }) {
             <ScreenshotPlaceholder project={project} />
           )}
 
-          {/* Top sheen */}
+          {/* Soft top sheen */}
           <div
             className="pointer-events-none absolute inset-x-0 top-0"
             style={{
-              height: "30%",
+              height: "26%",
               background:
-                "linear-gradient(to bottom, rgba(255,255,255,0.04), transparent)",
+                "linear-gradient(to bottom, rgba(255,255,255,0.03), transparent)",
             }}
+          />
+
+          {/* Hairline inner glass ring for depth */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.04)" }}
           />
         </div>
       </div>
@@ -544,9 +571,9 @@ function ScreenshotFrame({ project }: { project: Project }) {
       {multiple && (
         <div
           className="flex items-center justify-between"
-          style={{ marginTop: "1.1rem" }}
+          style={{ marginTop: "1.25rem" }}
         >
-          {/* Dots */}
+          {/* Pagination dots */}
           <div className="flex items-center gap-2">
             {images.map((_, i) => (
               <button
@@ -562,8 +589,10 @@ function ScreenshotFrame({ project }: { project: Project }) {
                   padding: 0,
                   cursor: "pointer",
                   background:
-                    i === index ? "var(--color-brand)" : "rgba(255,255,255,0.22)",
-                  transition: "width 0.35s ease, background 0.35s ease",
+                    i === index ? "var(--color-brand)" : "rgba(255,255,255,0.2)",
+                  boxShadow: i === index ? "0 0 8px rgba(53,105,226,0.45)" : "none",
+                  transition:
+                    "width 0.35s ease, background 0.35s ease, box-shadow 0.35s ease",
                 }}
               />
             ))}
