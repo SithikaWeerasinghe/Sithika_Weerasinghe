@@ -167,6 +167,51 @@ function StackTags({ stack }: { stack: string[] }) {
   );
 }
 
+/**
+ * Status pill — keeps every project's status consistent: one neutral chip with
+ * a small state dot (green = shipped/live, blue = everything else). The wording
+ * itself stays exactly as approved in the project data.
+ */
+function statusTone(status: string): string {
+  return status.toLowerCase().includes("live")
+    ? "#22c55e" // shipped / live — matches the live indicator used elsewhere
+    : "var(--color-brand)"; // in progress, prototype, client build, etc.
+}
+
+function StatusChip({ status }: { status: string }) {
+  const tone = statusTone(status);
+  return (
+    <span
+      className="inline-flex items-center gap-2"
+      style={{
+        fontFamily: "var(--font-mono)",
+        fontSize: "0.55rem",
+        letterSpacing: "0.14em",
+        textTransform: "uppercase",
+        color: "rgba(255,255,255,0.72)",
+        padding: "4px 11px 4px 9px",
+        borderRadius: "9999px",
+        background: "rgba(255,255,255,0.03)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        whiteSpace: "nowrap",
+      }}
+    >
+      <span
+        aria-hidden="true"
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: "50%",
+          background: tone,
+          boxShadow: `0 0 6px ${tone}`,
+          flexShrink: 0,
+        }}
+      />
+      {status}
+    </span>
+  );
+}
+
 const ArrowGlyph = () => (
   <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
     <path
@@ -462,8 +507,9 @@ function ScreenshotFrame({ project }: { project: Project }) {
                   src={images[index]}
                   alt={`${project.title} screenshot ${index + 1}`}
                   fill
-                  sizes="(max-width: 1024px) 92vw, 48vw"
-                  style={{ objectFit: "cover" }}
+                  sizes="(max-width: 640px) 88vw, (max-width: 1024px) 90vw, 48vw"
+                  // Webpage screenshots read best anchored to the top edge.
+                  style={{ objectFit: "cover", objectPosition: "top center" }}
                   draggable={false}
                 />
               </motion.div>
@@ -499,14 +545,14 @@ function ScreenshotFrame({ project }: { project: Project }) {
                 onClick={() => goTo(i)}
                 aria-label={`Go to screenshot ${i + 1}`}
                 style={{
-                  width: i === index ? 22 : 7,
-                  height: 7,
+                  width: i === index ? 20 : 6,
+                  height: 6,
                   borderRadius: "9999px",
                   border: "none",
                   padding: 0,
                   cursor: "pointer",
                   background:
-                    i === index ? "var(--color-brand)" : "rgba(255,255,255,0.18)",
+                    i === index ? "var(--color-brand)" : "rgba(255,255,255,0.22)",
                   transition: "width 0.35s ease, background 0.35s ease",
                 }}
               />
@@ -532,14 +578,14 @@ function ScreenshotFrame({ project }: { project: Project }) {
             <RoundIconButton
               onClick={() => paginate(-1)}
               label="Previous screenshot"
-              size={38}
+              size={36}
             >
               <Chevron to="left" />
             </RoundIconButton>
             <RoundIconButton
               onClick={() => paginate(1)}
               label="Next screenshot"
-              size={38}
+              size={36}
             >
               <Chevron to="right" />
             </RoundIconButton>
@@ -651,24 +697,9 @@ function ProjectInfo({ project }: { project: Project }) {
       {/* Meta row */}
       <div
         className="flex items-center gap-3 flex-wrap"
-        style={{ marginBottom: "1.7rem" }}
+        style={{ marginBottom: "1.9rem" }}
       >
-        <span
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "0.55rem",
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "var(--color-brand)",
-            padding: "3px 9px",
-            borderRadius: "9999px",
-            background: "rgba(53,105,226,0.1)",
-            border: "1px solid rgba(53,105,226,0.22)",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {project.status}
-        </span>
+        <StatusChip status={project.status} />
         <span
           style={{
             fontFamily: "var(--font-mono)",
@@ -697,7 +728,7 @@ function ProjectInfo({ project }: { project: Project }) {
       </p>
 
       {/* Role */}
-      <div className="mb-7">
+      <div className="mb-8">
         <span
           style={{
             display: "block",
@@ -706,7 +737,7 @@ function ProjectInfo({ project }: { project: Project }) {
             letterSpacing: "0.2em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.3)",
-            marginBottom: "0.6rem",
+            marginBottom: "0.7rem",
           }}
         >
           My Role
@@ -715,8 +746,8 @@ function ProjectInfo({ project }: { project: Project }) {
           style={{
             fontFamily: "var(--font-sans)",
             fontSize: "0.95rem",
-            lineHeight: 1.65,
-            color: "rgba(255,255,255,0.6)",
+            lineHeight: 1.68,
+            color: "rgba(255,255,255,0.62)",
             maxWidth: "52ch",
           }}
         >
@@ -742,7 +773,16 @@ function ProjectInfo({ project }: { project: Project }) {
         <StackTags stack={project.stack} />
       </div>
 
-      <ProjectLinks project={project} />
+      {/* Footer — actions sit below a hairline for clear hierarchy */}
+      <div
+        style={{
+          marginTop: "0.4rem",
+          paddingTop: "1.6rem",
+          borderTop: "1px solid rgba(255,255,255,0.07)",
+        }}
+      >
+        <ProjectLinks project={project} />
+      </div>
     </div>
   );
 }
@@ -754,6 +794,77 @@ const panelVariants = {
   center: { opacity: 1, x: 0 },
   exit: (d: number) => ({ opacity: 0, x: d >= 0 ? -48 : 48 }),
 };
+
+/** Project selector pill. Brighter inactive text + a subtle hover lift so
+ *  unselected projects stay readable, not greyed-out. */
+function ProjectTab({
+  project,
+  isActive,
+  onSelect,
+}: {
+  project: Project;
+  isActive: boolean;
+  onSelect: () => void;
+}) {
+  const [hover, setHover] = useState(false);
+
+  return (
+    <button
+      onClick={onSelect}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      className="inline-flex items-center gap-2.5"
+      style={{
+        padding: "0.5rem 0.95rem",
+        borderRadius: "9999px",
+        border: isActive
+          ? "1px solid rgba(53,105,226,0.5)"
+          : hover
+          ? "1px solid rgba(255,255,255,0.2)"
+          : "1px solid rgba(255,255,255,0.1)",
+        background: isActive
+          ? "rgba(53,105,226,0.1)"
+          : hover
+          ? "rgba(255,255,255,0.05)"
+          : "rgba(255,255,255,0.025)",
+        cursor: "pointer",
+        transition: "all 0.3s cubic-bezier(0.22,1,0.36,1)",
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: "0.6rem",
+          letterSpacing: "0.1em",
+          color: isActive
+            ? "var(--color-brand)"
+            : hover
+            ? "rgba(255,255,255,0.6)"
+            : "rgba(255,255,255,0.42)",
+          transition: "color 0.3s ease",
+        }}
+      >
+        {project.id}
+      </span>
+      <span
+        style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "0.82rem",
+          fontWeight: 600,
+          letterSpacing: "-0.01em",
+          color: isActive
+            ? "#ffffff"
+            : hover
+            ? "rgba(255,255,255,0.85)"
+            : "rgba(255,255,255,0.66)",
+          transition: "color 0.3s ease",
+        }}
+      >
+        {project.title}
+      </span>
+    </button>
+  );
+}
 
 function ProjectsDesktop() {
   const [[active, dir], setActive] = useState<[number, number]>([0, 0]);
@@ -857,55 +968,15 @@ function ProjectsDesktop() {
         }}
       >
         <ul className="flex items-center gap-2.5 flex-wrap">
-          {PROJECTS.map((p, i) => {
-            const isActive = i === active;
-            return (
-              <li key={p.id}>
-                <button
-                  onClick={() => go(i)}
-                  className="group inline-flex items-center gap-2.5"
-                  style={{
-                    padding: "0.5rem 0.95rem",
-                    borderRadius: "9999px",
-                    border: isActive
-                      ? "1px solid rgba(53,105,226,0.5)"
-                      : "1px solid rgba(255,255,255,0.08)",
-                    background: isActive
-                      ? "rgba(53,105,226,0.1)"
-                      : "rgba(255,255,255,0.02)",
-                    cursor: "pointer",
-                    transition: "all 0.35s cubic-bezier(0.22,1,0.36,1)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "0.6rem",
-                      letterSpacing: "0.1em",
-                      color: isActive
-                        ? "var(--color-brand)"
-                        : "rgba(255,255,255,0.3)",
-                      transition: "color 0.35s ease",
-                    }}
-                  >
-                    {p.id}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-display)",
-                      fontSize: "0.82rem",
-                      fontWeight: 600,
-                      letterSpacing: "-0.01em",
-                      color: isActive ? "#ffffff" : "rgba(255,255,255,0.45)",
-                      transition: "color 0.35s ease",
-                    }}
-                  >
-                    {p.title}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
+          {PROJECTS.map((p, i) => (
+            <li key={p.id}>
+              <ProjectTab
+                project={p}
+                isActive={i === active}
+                onSelect={() => go(i)}
+              />
+            </li>
+          ))}
         </ul>
 
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -1055,19 +1126,23 @@ function ProjectsMobile() {
               {p.title}
             </h3>
 
-            <span
-              style={{
-                display: "block",
-                fontFamily: "var(--font-mono)",
-                fontSize: "0.58rem",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.35)",
-                marginBottom: "1.3rem",
-              }}
+            <div
+              className="flex items-center gap-2.5 flex-wrap"
+              style={{ marginBottom: "1.4rem" }}
             >
-              {p.type}
-            </span>
+              <StatusChip status={p.status} />
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "0.58rem",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.35)",
+                }}
+              >
+                {p.type}
+              </span>
+            </div>
 
             <p
               style={{
@@ -1124,7 +1199,15 @@ function ProjectsMobile() {
               <StackTags stack={p.stack} />
             </div>
 
-            <ProjectLinks project={p} />
+            <div
+              style={{
+                marginTop: "0.4rem",
+                paddingTop: "1.4rem",
+                borderTop: "1px solid rgba(255,255,255,0.07)",
+              }}
+            >
+              <ProjectLinks project={p} />
+            </div>
           </motion.article>
         ))}
       </div>
