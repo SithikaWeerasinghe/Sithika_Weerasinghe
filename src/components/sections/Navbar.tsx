@@ -1,16 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Premium scroll behavior: the header is transparent over the dark hero, then
+  // fades in a subtle glass backdrop once the page scrolls — so it reads cleanly
+  // over every section (including light project screenshots and cert images)
+  // instead of inverting awkwardly the way mix-blend-difference did.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <>
-      {/* Fixed header — always on top (z-[70] > overlay z-[60]) */}
-      <header className="fixed top-0 left-0 right-0 z-[70] mix-blend-difference pointer-events-auto">
+      {/* Fixed header — transparent over the hero, glass-backed once scrolled.
+          z-[70] keeps it above the overlay (z-[60]). */}
+      <header
+        className="fixed top-0 left-0 right-0 z-[70] pointer-events-auto"
+        style={{
+          background: scrolled ? "rgba(2,2,2,0.6)" : "transparent",
+          backdropFilter: scrolled ? "blur(14px)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(14px)" : "none",
+          borderBottom: scrolled
+            ? "1px solid rgba(255,255,255,0.06)"
+            : "1px solid transparent",
+          boxShadow: scrolled ? "0 10px 30px -22px rgba(0,0,0,0.85)" : "none",
+          transition:
+            "background 0.4s ease, backdrop-filter 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease",
+        }}
+      >
         <Container className="flex items-center justify-between h-24">
           <Link
             href="/"

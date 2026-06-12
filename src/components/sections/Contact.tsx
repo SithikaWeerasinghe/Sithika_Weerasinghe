@@ -3,15 +3,25 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 
+const EASE = [0.22, 1, 0.36, 1] as const;
+const EMAIL = "sithikaweerasinghe2005@gmail.com";
+
+const SOCIALS = [
+  { label: "GitHub", href: "https://github.com/sithika-weerasinghe" },
+  { label: "LinkedIn", href: "https://linkedin.com/in/sithika-weerasinghe" },
+  { label: "Instagram", href: "https://instagram.com/sithika.weerasinghe" },
+];
+
+// Subtle floating background dots — restrained ambient detail.
 const DOTS = [
   { top: "12%", left: "8%" }, { top: "28%", left: "18%" }, { top: "55%", left: "5%" },
   { top: "75%", left: "14%" }, { top: "18%", left: "88%" }, { top: "42%", left: "94%" },
-  { top: "68%", left: "85%" }, { top: "82%", left: "92%" }, { top: "8%",  left: "52%" },
-  { top: "88%", left: "45%" }, { top: "35%", left: "3%"  }, { top: "60%", left: "96%" },
+  { top: "68%", left: "85%" }, { top: "82%", left: "92%" }, { top: "8%", left: "52%" },
+  { top: "88%", left: "45%" }, { top: "35%", left: "3%" }, { top: "60%", left: "96%" },
 ];
 
 export function Contact() {
-  const [hovered, setHovered] = useState(false);
+  const [emailHover, setEmailHover] = useState(false);
 
   return (
     <section
@@ -20,7 +30,7 @@ export function Contact() {
       style={{
         background: "#020202",
         borderColor: "rgba(255,255,255,0.04)",
-        minHeight: "60vh",
+        minHeight: "72vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -28,7 +38,7 @@ export function Contact() {
         padding: "clamp(5rem, 12vw, 10rem) clamp(1.5rem, 5vw, 6rem)",
       }}
     >
-      {/* Subtle floating dots */}
+      {/* Floating dots */}
       {DOTS.map((d, i) => (
         <span
           key={i}
@@ -50,94 +60,173 @@ export function Contact() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(53,105,226,0.05) 0%, transparent 70%)",
+            "radial-gradient(ellipse 60% 55% at 50% 45%, rgba(53,105,226,0.06) 0%, transparent 70%)",
         }}
       />
 
       {/* Content */}
-      <div className="relative text-center" style={{ maxWidth: "900px", width: "100%" }}>
+      <div className="relative text-center" style={{ maxWidth: "880px", width: "100%" }}>
         {/* Eyebrow */}
+        <motion.div
+          className="flex items-center justify-center gap-3 mb-7"
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: EASE }}
+          viewport={{ once: false, amount: 0.5 }}
+        >
+          <span className="w-5 h-px" style={{ background: "var(--color-brand)" }} />
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.6rem",
+              letterSpacing: "0.28em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.4)",
+            }}
+          >
+            Let&apos;s Connect
+          </span>
+          <span className="w-5 h-px" style={{ background: "var(--color-brand)" }} />
+        </motion.div>
+
         {/* Heading */}
         <motion.h2
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 14 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.9, ease: EASE, delay: 0.05 }}
           viewport={{ once: false, amount: 0.5 }}
           style={{
             fontFamily: "var(--font-display)",
-            fontSize: "clamp(2.8rem, 7vw, 6rem)",
+            fontSize: "clamp(2.6rem, 6.5vw, 5.4rem)",
             fontWeight: 800,
             letterSpacing: "-0.04em",
-            lineHeight: 1.05,
-            color: "rgba(255,255,255,0.92)",
-            marginBottom: "1.8rem",
+            lineHeight: 1.04,
+            color: "rgba(255,255,255,0.94)",
+            marginBottom: "1.6rem",
           }}
         >
-          Have a project in mind?
+          Let&apos;s build something
+          <br />
+          <span style={{ color: "var(--color-brand)" }}>that lasts.</span>
         </motion.h2>
 
-        {/* Email */}
-        <motion.a
-          href="mailto:sithikaweerasinghe2005@gmail.com"
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          initial={{ opacity: 0, y: 16 }}
+        {/* Supporting message */}
+        <motion.p
+          initial={{ opacity: 0, y: 14 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+          transition={{ duration: 0.9, ease: EASE, delay: 0.12 }}
           viewport={{ once: false, amount: 0.5 }}
           style={{
-            display: "block",
             fontFamily: "var(--font-sans)",
-            fontSize: "clamp(0.9rem, 2vw, 1.3rem)",
-            fontWeight: 400,
-            letterSpacing: "0.01em",
-            color: hovered ? "var(--color-brand)" : "rgba(255,255,255,0.4)",
-            textDecoration: "none",
-            transition: "color 0.35s ease",
+            fontSize: "clamp(1rem, 1.25vw, 1.15rem)",
+            lineHeight: 1.7,
+            letterSpacing: "-0.005em",
+            color: "rgba(255,255,255,0.55)",
+            maxWidth: "46ch",
+            margin: "0 auto",
           }}
         >
-          sithikaweerasinghe2005@gmail.com
-        </motion.a>
+          I&apos;m a creative technologist and Computer Science undergraduate —
+          open to internships, freelance projects, and meaningful collaborations.
+          If you&apos;re building something worthwhile, I&apos;d love to be part of it.
+        </motion.p>
+
+        {/* CTA + email */}
+        <motion.div
+          className="flex flex-col items-center"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, ease: EASE, delay: 0.2 }}
+          viewport={{ once: false, amount: 0.5 }}
+          style={{ marginTop: "2.6rem" }}
+        >
+          {/* Primary CTA */}
+          <a
+            href={`mailto:${EMAIL}`}
+            className="inline-flex items-center gap-2.5"
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.7rem",
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: "#ffffff",
+              textDecoration: "none",
+              padding: "0.95rem 1.9rem",
+              borderRadius: "9999px",
+              background: "var(--color-brand)",
+              transition: "transform 0.3s ease, box-shadow 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 16px 40px -12px rgba(53,105,226,0.5)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "none";
+            }}
+          >
+            Start a Conversation
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path
+                d="M3 9L9 3M9 3H4M9 3V8"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </a>
+
+          {/* Email as the strong direct anchor */}
+          <a
+            href={`mailto:${EMAIL}`}
+            onMouseEnter={() => setEmailHover(true)}
+            onMouseLeave={() => setEmailHover(false)}
+            style={{
+              display: "inline-block",
+              marginTop: "1.5rem",
+              fontFamily: "var(--font-sans)",
+              fontSize: "clamp(0.95rem, 1.4vw, 1.15rem)",
+              letterSpacing: "0.01em",
+              color: emailHover ? "var(--color-brand)" : "rgba(255,255,255,0.55)",
+              textDecoration: "none",
+              borderBottom: emailHover
+                ? "1px solid var(--color-brand)"
+                : "1px solid rgba(255,255,255,0.12)",
+              paddingBottom: "0.2rem",
+              transition: "color 0.3s ease, border-color 0.3s ease",
+            }}
+          >
+            {EMAIL}
+          </a>
+        </motion.div>
 
         {/* Divider */}
         <motion.div
-          className="mx-auto mt-14 mb-10"
+          className="mx-auto mt-16 mb-9"
           initial={{ opacity: 0, scaleX: 0 }}
           whileInView={{ opacity: 1, scaleX: 1 }}
-          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
+          transition={{ duration: 1, ease: EASE, delay: 0.3 }}
           viewport={{ once: false, amount: 0.5 }}
           style={{
             height: "1px",
             background:
-              "linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent)",
+              "linear-gradient(to right, transparent, rgba(255,255,255,0.09), transparent)",
             transformOrigin: "center",
           }}
         />
 
-        {/* Footer line */}
+        {/* Footer */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.35 }}
+          transition={{ duration: 1, delay: 0.4 }}
           viewport={{ once: false, amount: 0.5 }}
-          className="flex flex-col items-center gap-3"
+          className="flex flex-col items-center gap-4"
         >
-          <p
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: "0.82rem",
-              color: "rgba(255,255,255,0.28)",
-              fontWeight: 300,
-            }}
-          >
-            Design &amp; built by Sithika Weerasinghe
-          </p>
+          {/* Social links */}
           <div className="flex items-center gap-3 flex-wrap justify-center">
-            {[
-              { label: "GitHub", href: "https://github.com/sithika-weerasinghe" },
-              { label: "LinkedIn", href: "https://linkedin.com/in/sithika-weerasinghe" },
-              { label: "Instagram", href: "https://instagram.com/sithika.weerasinghe" },
-            ].map(({ label, href }) => (
+            {SOCIALS.map(({ label, href }) => (
               <a
                 key={label}
                 href={href}
@@ -150,10 +239,11 @@ export function Contact() {
                   color: "rgba(255,255,255,0.55)",
                   textDecoration: "none",
                   textTransform: "uppercase",
-                  padding: "0.4rem 1rem",
+                  padding: "0.45rem 1.1rem",
                   border: "1px solid rgba(255,255,255,0.1)",
                   borderRadius: "9999px",
-                  transition: "color 0.25s ease, border-color 0.25s ease, background 0.25s ease",
+                  transition:
+                    "color 0.25s ease, border-color 0.25s ease, background 0.25s ease",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.color = "#ffffff";
@@ -173,12 +263,23 @@ export function Contact() {
 
           <p
             style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: "0.8rem",
+              color: "rgba(255,255,255,0.3)",
+              fontWeight: 300,
+              marginTop: "0.4rem",
+            }}
+          >
+            Designed &amp; built by Sithika Weerasinghe
+          </p>
+
+          <p
+            style={{
               fontFamily: "var(--font-mono)",
               fontSize: "0.55rem",
               letterSpacing: "0.15em",
-              color: "rgba(255,255,255,0.12)",
+              color: "rgba(255,255,255,0.14)",
               textTransform: "uppercase",
-              marginTop: "0.5rem",
             }}
           >
             © 2026 Sithika Weerasinghe — All rights reserved
