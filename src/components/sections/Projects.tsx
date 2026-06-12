@@ -51,19 +51,53 @@ const PROJECTS: Project[] = [
       "/projects/adorix-team.jpg", // Slide 2 — team with the physical kiosk device
     ],
   },
+  // ── Slot 02 — archived ML placeholder (kept so it can be restored later) ──
+  // {
+  //   id: "02",
+  //   title: "ML Project",
+  //   label: "Details updating soon",
+  //   type: "Machine Learning Project",
+  //   status: "In Progress",
+  //   description:
+  //     "A machine learning project focused on solving a real prediction or classification problem through a structured model pipeline and practical evaluation workflow.",
+  //   role: "Model development / evaluation.",
+  //   stack: [],
+  //   live: null,
+  //   github: null,
+  //   images: [],
+  // },
   {
     id: "02",
-    title: "ML Project",
-    label: "Details updating soon",
-    type: "Machine Learning Project",
-    status: "In Progress",
+    title: "DataLens AI",
+    label: "AI-Powered Data Analytics Platform",
+    type: "AI-Powered Data Analytics Platform",
+    status: "Solo Project · Live",
     description:
-      "A machine learning project focused on solving a real prediction or classification problem through a structured model pipeline and practical evaluation workflow.",
-    role: "Model development / evaluation.",
-    stack: [],
-    live: null,
-    github: null,
-    images: [],
+      "A modern data analytics platform that turns uploaded CSV files into interactive dashboards, automated visualizations, and AI-style insights.",
+    role: "Full project development.",
+    stack: [
+      "Next.js",
+      "TypeScript",
+      "Tailwind CSS",
+      "Recharts",
+      "PapaParse",
+      "Framer Motion",
+      "jsPDF",
+      "Data Analytics",
+    ],
+    live: "https://data-lens-ai-eight.vercel.app/",
+    github: "https://github.com/SithikaWeerasinghe/DataLens-AI",
+    // Dossier (not shown in the current panel): solo build, fully client-side —
+    // no backend or database. Challenge: run CSV parsing, type inference,
+    // missing-value/trend detection and several interactive charts entirely
+    // in-browser without freezing the UI on larger datasets. Solved by streaming
+    // parsing with PapaParse and a single memoized analysis pass that feeds the
+    // Recharts dashboards from prepared summaries instead of re-scanning rows.
+    images: [
+      "/projects/datalens-home.png", // Slide 1 — hero / product intro
+      "/projects/datalens-dashboard.png", // Slide 2 — analytics dashboard (charts)
+      "/projects/datalens-upload.png", // Slide 3 — CSV upload workflow
+    ],
   },
   {
     id: "03",
