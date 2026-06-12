@@ -83,7 +83,11 @@ const PROJECTS: Project[] = [
     ],
     live: "https://www.apexfled.com",
     github: "https://github.com/SithikaWeerasinghe/digital-account-store",
-    images: [],
+    images: [
+      "/projects/apexfled-home.png", // Slide 1 — homepage / hero
+      "/projects/apexfled-dashboard.png", // Slide 2 — admin dashboard
+      "/projects/apexfled-checkout.png", // Slide 3 — product detail / checkout
+    ],
   },
   {
     id: "04",
@@ -137,10 +141,10 @@ function StackTags({ stack }: { stack: string[] }) {
       <span
         style={{
           fontFamily: "var(--font-mono)",
-          fontSize: "0.6rem",
-          letterSpacing: "0.18em",
+          fontSize: "0.62rem",
+          letterSpacing: "0.16em",
           textTransform: "uppercase",
-          color: "rgba(255,255,255,0.25)",
+          color: "rgba(255,255,255,0.3)",
         }}
       >
         Stack updating soon
@@ -148,18 +152,20 @@ function StackTags({ stack }: { stack: string[] }) {
     );
   }
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2.5">
       {stack.map((t) => (
         <span
           key={t}
           style={{
             fontFamily: "var(--font-mono)",
-            fontSize: "0.58rem",
-            letterSpacing: "0.1em",
-            color: "rgba(255,255,255,0.5)",
-            padding: "4px 9px",
-            border: "1px solid rgba(255,255,255,0.09)",
-            borderRadius: "3px",
+            fontSize: "0.66rem",
+            fontWeight: 500,
+            letterSpacing: "0.07em",
+            color: "rgba(255,255,255,0.66)",
+            padding: "5px 11px",
+            border: "1px solid rgba(255,255,255,0.14)",
+            borderRadius: "6px",
+            background: "rgba(255,255,255,0.025)",
             textTransform: "uppercase",
             whiteSpace: "nowrap",
           }}
@@ -721,11 +727,13 @@ function ProjectInfo({ project }: { project: Project }) {
       <p
         style={{
           fontFamily: "var(--font-sans)",
-          fontSize: "clamp(1.05rem, 1.2vw, 1.22rem)",
-          lineHeight: 1.75,
-          color: "rgba(255,255,255,0.86)",
+          fontSize: "clamp(1.06rem, 1.15vw, 1.2rem)",
+          lineHeight: 1.7,
+          letterSpacing: "-0.011em",
+          color: "rgba(255,255,255,0.9)",
           marginBottom: "2rem",
           maxWidth: "52ch",
+          textWrap: "pretty",
         }}
       >
         {project.description}
@@ -749,10 +757,12 @@ function ProjectInfo({ project }: { project: Project }) {
         <p
           style={{
             fontFamily: "var(--font-sans)",
-            fontSize: "0.95rem",
-            lineHeight: 1.68,
-            color: "rgba(255,255,255,0.62)",
+            fontSize: "0.92rem",
+            lineHeight: 1.65,
+            letterSpacing: "-0.005em",
+            color: "rgba(255,255,255,0.6)",
             maxWidth: "52ch",
+            textWrap: "pretty",
           }}
         >
           {project.role}
@@ -1203,9 +1213,11 @@ function ProjectsMobile() {
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "1rem",
-                lineHeight: 1.7,
-                color: "rgba(255,255,255,0.82)",
+                lineHeight: 1.68,
+                letterSpacing: "-0.01em",
+                color: "rgba(255,255,255,0.86)",
                 marginBottom: "1.5rem",
+                textWrap: "pretty",
               }}
             >
               {p.description}
@@ -1229,8 +1241,10 @@ function ProjectsMobile() {
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontSize: "0.85rem",
-                  lineHeight: 1.6,
-                  color: "rgba(255,255,255,0.55)",
+                  lineHeight: 1.62,
+                  letterSpacing: "-0.005em",
+                  color: "rgba(255,255,255,0.58)",
+                  textWrap: "pretty",
                 }}
               >
                 {p.role}
