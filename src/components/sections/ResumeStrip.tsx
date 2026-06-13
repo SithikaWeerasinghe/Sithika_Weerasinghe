@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 
+// Resume file. Drop your CV at `public/resume.pdf` (or point this at any URL).
+// To update the résumé later, just replace that file — this link stays the same.
+const RESUME_URL = "/resume.pdf";
+
 export function ResumeStrip() {
   const [hovered, setHovered] = useState(false);
 
@@ -17,10 +21,9 @@ export function ResumeStrip() {
       }}
     >
       <motion.a
-        href="#"
+        href={RESUME_URL}
         target="_blank"
         rel="noopener noreferrer"
-        onClick={(e) => e.preventDefault()}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         initial={{ opacity: 0, y: 12 }}

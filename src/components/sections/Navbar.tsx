@@ -1,58 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  // Premium scroll behavior: the header is transparent over the dark hero, then
-  // fades in a subtle glass backdrop once the page scrolls — so it reads cleanly
-  // over every section (including light project screenshots and cert images)
-  // instead of inverting awkwardly the way mix-blend-difference did.
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   return (
     <>
-      {/* Fixed header — transparent over the hero, glass-backed once scrolled.
-          z-[70] keeps it above the overlay (z-[60]). */}
-      <header
-        className="fixed top-0 left-0 right-0 z-[70] pointer-events-auto"
-        style={{
-          // Steady, always-present header bar — SW + MENU stay anchored at the
-          // top. The glass just deepens slightly once scrolled, so nothing
-          // "appears" or shifts mid-scroll.
-          background: scrolled ? "rgba(2,2,2,0.72)" : "rgba(2,2,2,0.45)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          borderBottom: scrolled
-            ? "1px solid rgba(255,255,255,0.07)"
-            : "1px solid rgba(255,255,255,0.04)",
-          boxShadow: scrolled ? "0 10px 30px -22px rgba(0,0,0,0.85)" : "none",
-          transition:
-            "background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease",
-        }}
-      >
-        <Container className="flex items-center justify-between h-24">
-          <Link
-            href="/"
-            className="text-2xl font-display font-extrabold text-white"
-            style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.04em" }}
-          >
-            SW.
-          </Link>
-
+      {/* Minimal floating header — only the MENU trigger, no bar. The header
+          ignores pointer events so the rest of the top strip stays clickable;
+          only the button is interactive. z-[70] keeps it above the overlay. */}
+      <header className="fixed top-0 left-0 right-0 z-[70] pointer-events-none">
+        <Container className="flex items-center justify-end h-24">
           {/* Single toggle button — hamburger ↔ X */}
           <button
             onClick={() => setIsOpen((prev) => !prev)}
-            className="flex items-center gap-3 group -mr-2 sm:-mr-3 lg:-mr-5"
+            className="flex items-center gap-3 group -mr-2 sm:-mr-3 lg:-mr-5 pointer-events-auto"
             aria-label={isOpen ? "Close menu" : "Open menu"}
           >
             <span

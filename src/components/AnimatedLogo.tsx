@@ -5,7 +5,6 @@
  *
  * The splash animation in `SplashScreen` targets these class names:
  *   .splash-logo     — the whole group (subtle scale settle)
- *   .splash-eyebrow  — the small mono label (fade up)
  *   .splash-name     — the signature wordmark (left-to-right reveal)
  *   .splash-rule     — the thin accent line (scaleX draw)
  *
@@ -19,22 +18,6 @@ export function AnimatedLogo() {
       className="splash-logo relative text-center"
       style={{ padding: "0 1.5rem", willChange: "transform" }}
     >
-      <span
-        className="splash-eyebrow"
-        style={{
-          display: "block",
-          fontFamily: "var(--font-mono)",
-          fontSize: "clamp(0.55rem, 1.4vw, 0.68rem)",
-          letterSpacing: "0.42em",
-          textTransform: "uppercase",
-          color: "rgba(255,255,255,0.4)",
-          marginBottom: "clamp(1rem, 2.5vh, 1.6rem)",
-          paddingLeft: "0.42em", // optical balance for the wide tracking
-        }}
-      >
-        Portfolio — 2026
-      </span>
-
       {/* TEMPORARY signature wordmark — replace with a real <svg> later. */}
       <h1
         className="splash-name"

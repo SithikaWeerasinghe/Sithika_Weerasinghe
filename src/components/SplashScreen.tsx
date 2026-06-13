@@ -58,7 +58,7 @@ export function SplashScreen() {
 
       // Reduced motion: show the mark briefly, then a gentle fade — no sweep/scale.
       if (reduceMotion) {
-        gsap.set([".splash-eyebrow", ".splash-name", ".splash-rule"], {
+        gsap.set([".splash-name", ".splash-rule"], {
           autoAlpha: 1,
           clipPath: "inset(0 0% 0 0)",
           y: 0,
@@ -73,7 +73,6 @@ export function SplashScreen() {
 
       // Initial states.
       gsap.set(".splash-name", { clipPath: "inset(0 100% 0 0)" });
-      gsap.set(".splash-eyebrow", { autoAlpha: 0, y: 10 });
       gsap.set(".splash-rule", { scaleX: 0 });
       gsap.set(".splash-progress-fill", { scaleX: 0 });
 
@@ -82,8 +81,6 @@ export function SplashScreen() {
         .timeline({ defaults: { ease: "power3.out" }, onComplete: finish })
         // progress line fills across the whole intro
         .to(".splash-progress-fill", { scaleX: 1, duration: 2.4, ease: "none" }, 0)
-        // eyebrow settles in
-        .to(".splash-eyebrow", { autoAlpha: 1, y: 0, duration: 0.6 }, 0.2)
         // signature reveals left → right (like it's being written)
         .to(
           ".splash-name",
@@ -97,7 +94,7 @@ export function SplashScreen() {
         .to(".splash-logo", { scale: 1, duration: 0.55, ease: "sine.inOut" }, 2.45)
         // mark fades just before the curtain lifts
         .to(
-          [".splash-eyebrow", ".splash-name", ".splash-rule"],
+          [".splash-name", ".splash-rule"],
           { autoAlpha: 0, y: -12, duration: 0.45, ease: "power2.in" },
           2.55
         )
