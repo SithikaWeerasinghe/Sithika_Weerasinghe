@@ -81,7 +81,7 @@ function POVButton({
       // on focus — activation stays on Enter/Space (click) for predictability.
       onFocus={() => setHover(true)}
       onBlur={() => setHover(false)}
-      className="flex items-center gap-2 pb-2.5 transition-all duration-200"
+      className="flex items-center gap-2 pt-2 pb-2.5 transition-all duration-200"
       style={{
         borderBottom: isActive
           ? "1.5px solid var(--color-brand)"
@@ -172,15 +172,14 @@ export function About() {
         }}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] min-h-[88vh]">
+      <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] lg:min-h-[88vh]">
 
         {/* ── Left: heading + horizontal tabs ── */}
         <motion.div
-          className="relative flex flex-col justify-center py-24 lg:py-0"
+          className="relative flex flex-col justify-center py-16 sm:py-20 lg:py-0 lg:border-r lg:border-white/5"
           style={{
             paddingLeft: "clamp(1.5rem, 5vw, 6rem)",
             paddingRight: "clamp(1.5rem, 3vw, 3.5rem)",
-            borderRight: "1px solid rgba(255,255,255,0.05)",
           }}
           initial={{ opacity: 0, x: -35, y: 10 }}
           whileInView={{ opacity: 1, x: 0, y: 0 }}
@@ -231,8 +230,8 @@ export function About() {
             </span>
           </div>
 
-          {/* Horizontal tabs */}
-          <div className="flex items-center gap-7">
+          {/* Horizontal tabs — wrap-friendly + roomier spacing on small screens */}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 sm:gap-7">
             {POVS.map((p, i) => (
               <POVButton
                 key={p.id}
@@ -331,9 +330,9 @@ export function About() {
 
         {/* ── Right: quote ── */}
         <motion.div
-          className="relative flex flex-col justify-center py-24 lg:py-0"
+          className="relative flex flex-col justify-center pt-4 pb-16 sm:py-20 lg:py-0"
           style={{
-            paddingLeft: "clamp(2.5rem, 6vw, 7rem)",
+            paddingLeft: "clamp(1.5rem, 6vw, 7rem)",
             paddingRight: "clamp(1.5rem, 5vw, 6rem)",
           }}
           initial={{ opacity: 0, x: 35, y: 10 }}

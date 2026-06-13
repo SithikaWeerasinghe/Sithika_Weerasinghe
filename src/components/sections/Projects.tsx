@@ -619,8 +619,9 @@ function ScreenshotFrame({ project }: { project: Project }) {
           className="flex items-center justify-between"
           style={{ marginTop: "1.25rem" }}
         >
-          {/* Pagination dots */}
-          <div className="flex items-center gap-2">
+          {/* Pagination dots — padded button gives a thumb-friendly hit area
+              while the inner bar keeps the same minimal visual. */}
+          <div className="flex items-center gap-1">
             {images.map((_, i) => (
               <button
                 key={i}
@@ -628,19 +629,31 @@ function ScreenshotFrame({ project }: { project: Project }) {
                 onClick={() => goTo(i)}
                 aria-label={`Go to screenshot ${i + 1}`}
                 style={{
-                  width: i === index ? 20 : 6,
-                  height: 6,
-                  borderRadius: "9999px",
                   border: "none",
-                  padding: 0,
+                  background: "transparent",
+                  padding: "8px 4px",
+                  margin: 0,
                   cursor: "pointer",
-                  background:
-                    i === index ? "var(--color-brand)" : "rgba(255,255,255,0.2)",
-                  boxShadow: i === index ? "0 0 8px rgba(53,105,226,0.45)" : "none",
-                  transition:
-                    "width 0.35s ease, background 0.35s ease, box-shadow 0.35s ease",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  lineHeight: 0,
                 }}
-              />
+              >
+                <span
+                  aria-hidden="true"
+                  style={{
+                    display: "block",
+                    width: i === index ? 20 : 6,
+                    height: 6,
+                    borderRadius: "9999px",
+                    background:
+                      i === index ? "var(--color-brand)" : "rgba(255,255,255,0.2)",
+                    boxShadow: i === index ? "0 0 8px rgba(53,105,226,0.45)" : "none",
+                    transition:
+                      "width 0.35s ease, background 0.35s ease, box-shadow 0.35s ease",
+                  }}
+                />
+              </button>
             ))}
           </div>
 
