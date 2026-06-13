@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 
+// Resume file. Drop the CV at `public/resume.pdf` (replace that file to update).
+const RESUME_URL = "/resume.pdf";
+
 const POVS = [
   {
     id: "everyone",
@@ -117,6 +120,7 @@ function POVButton({
 
 export function About() {
   const [active, setActive] = useState(0);
+  const [resumeHover, setResumeHover] = useState(false);
   const pov = POVS[active];
 
   // Hover-intent timer so a quick cursor pass-through doesn't switch tabs.
@@ -240,6 +244,88 @@ export function About() {
               />
             ))}
           </div>
+
+          {/* View Full Resume — sits under the POV selector, aligned with this
+              left column. Opens the CV in a new tab. */}
+          <a
+            href={RESUME_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onMouseEnter={() => setResumeHover(true)}
+            onMouseLeave={() => setResumeHover(false)}
+            style={{
+              alignSelf: "flex-start",
+              marginTop: "clamp(2rem, 4.5vh, 3rem)",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "1rem",
+              paddingTop: "0.55rem",
+              paddingBottom: "0.55rem",
+              paddingLeft: "1.6rem",
+              paddingRight: "0.55rem",
+              borderRadius: "9999px",
+              background: resumeHover ? "#111827" : "#0d0f18",
+              textDecoration: "none",
+              boxShadow: resumeHover
+                ? "0 8px 32px rgba(53,105,226,0.18), inset 0 0 0 1px rgba(53,105,226,0.2)"
+                : "inset 0 0 0 1px rgba(255,255,255,0.06)",
+              transform: resumeHover ? "translateY(-2px)" : "translateY(0)",
+              transition:
+                "background 0.4s ease, box-shadow 0.4s ease, transform 0.4s cubic-bezier(0.22,1,0.36,1)",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: "clamp(0.86rem, 1.3vw, 0.96rem)",
+                fontWeight: 500,
+                letterSpacing: "-0.01em",
+                color: resumeHover ? "#ffffff" : "rgba(255,255,255,0.82)",
+                transition: "color 0.35s ease",
+              }}
+            >
+              View Full Resume
+            </span>
+            <span
+              style={{
+                width: "2rem",
+                height: "2rem",
+                borderRadius: "9999px",
+                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: resumeHover
+                  ? "rgba(53,105,226,0.22)"
+                  : "rgba(255,255,255,0.07)",
+                transition: "background 0.4s ease",
+              }}
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 13 13"
+                fill="none"
+                aria-hidden="true"
+                style={{
+                  transform: resumeHover
+                    ? "translate(1px, -1px)"
+                    : "translate(0,0)",
+                  transition: "transform 0.35s cubic-bezier(0.22,1,0.36,1)",
+                }}
+              >
+                <path
+                  d="M2 11L11 2M7 2h4v4"
+                  stroke={
+                    resumeHover ? "var(--color-brand)" : "rgba(255,255,255,0.65)"
+                  }
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+          </a>
 
         </motion.div>
 
