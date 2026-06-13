@@ -26,15 +26,18 @@ export function Navbar() {
       <header
         className="fixed top-0 left-0 right-0 z-[70] pointer-events-auto"
         style={{
-          background: scrolled ? "rgba(2,2,2,0.6)" : "transparent",
-          backdropFilter: scrolled ? "blur(14px)" : "none",
-          WebkitBackdropFilter: scrolled ? "blur(14px)" : "none",
+          // Steady, always-present header bar — SW + MENU stay anchored at the
+          // top. The glass just deepens slightly once scrolled, so nothing
+          // "appears" or shifts mid-scroll.
+          background: scrolled ? "rgba(2,2,2,0.72)" : "rgba(2,2,2,0.45)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
           borderBottom: scrolled
-            ? "1px solid rgba(255,255,255,0.06)"
-            : "1px solid transparent",
+            ? "1px solid rgba(255,255,255,0.07)"
+            : "1px solid rgba(255,255,255,0.04)",
           boxShadow: scrolled ? "0 10px 30px -22px rgba(0,0,0,0.85)" : "none",
           transition:
-            "background 0.4s ease, backdrop-filter 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease",
+            "background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease",
         }}
       >
         <Container className="flex items-center justify-between h-24">
