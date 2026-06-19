@@ -23,8 +23,9 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sithika's Portfolio",
-  description: "Modern premium portfolio built with Next.js and Tailwind CSS",
+  title: "Sithika Weerasinghe — Portfolio",
+  description:
+    "Portfolio of Sithika Weerasinghe — Computer Science undergraduate and creative technologist building AI-powered platforms, web applications, and machine learning prototypes.",
 };
 
 export default function RootLayout({

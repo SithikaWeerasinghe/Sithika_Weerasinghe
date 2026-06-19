@@ -76,30 +76,30 @@ export function SplashScreen() {
       gsap.set(".splash-rule", { scaleX: 0 });
       gsap.set(".splash-progress-fill", { scaleX: 0 });
 
-      // Cinematic sequence (~3.4s total — within the 2.5–3.5s window).
+      // Cinematic sequence (~3.2s total — premium but not slow).
       gsap
         .timeline({ defaults: { ease: "power3.out" }, onComplete: finish })
         // progress line fills across the whole intro
-        .to(".splash-progress-fill", { scaleX: 1, duration: 2.4, ease: "none" }, 0)
+        .to(".splash-progress-fill", { scaleX: 1, duration: 2.1, ease: "none" }, 0)
         // signature reveals left → right (like it's being written)
         .to(
           ".splash-name",
-          { clipPath: "inset(0 0% 0 0)", duration: 1.05, ease: "power3.inOut" },
-          0.5
+          { clipPath: "inset(0 0% 0 0)", duration: 1.0, ease: "power3.inOut" },
+          0.4
         )
         // accent line draws
-        .to(".splash-rule", { scaleX: 1, duration: 0.7 }, 1.2)
+        .to(".splash-rule", { scaleX: 1, duration: 0.6 }, 1.05)
         // very subtle scale settle (not a pulse)
-        .to(".splash-logo", { scale: 1.015, duration: 0.6, ease: "sine.inOut" }, 1.85)
-        .to(".splash-logo", { scale: 1, duration: 0.55, ease: "sine.inOut" }, 2.45)
+        .to(".splash-logo", { scale: 1.015, duration: 0.55, ease: "sine.inOut" }, 1.6)
+        .to(".splash-logo", { scale: 1, duration: 0.5, ease: "sine.inOut" }, 2.15)
         // mark fades just before the curtain lifts
         .to(
           [".splash-name", ".splash-rule"],
-          { autoAlpha: 0, y: -12, duration: 0.45, ease: "power2.in" },
-          2.55
+          { autoAlpha: 0, y: -12, duration: 0.4, ease: "power2.in" },
+          2.25
         )
         // curtain exits upward, revealing the hero
-        .to(root.current, { yPercent: -100, duration: 0.85, ease: "power4.inOut" }, 2.7);
+        .to(root.current, { yPercent: -100, duration: 0.8, ease: "power4.inOut" }, 2.4);
     },
     { scope: root }
   );
@@ -115,7 +115,7 @@ export function SplashScreen() {
         position: "fixed",
         inset: 0,
         zIndex: 200, // above navbar (z-70) and menu overlay (z-60)
-        background: "#020205",
+        background: "#020202", // matches the hero for a seamless reveal
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -130,7 +130,19 @@ export function SplashScreen() {
           position: "absolute",
           inset: 0,
           background:
-            "radial-gradient(ellipse 55% 45% at 50% 45%, rgba(53,105,226,0.1) 0%, transparent 70%)",
+            "radial-gradient(ellipse 55% 45% at 50% 45%, rgba(53,105,226,0.09) 0%, transparent 70%)",
+        }}
+      />
+
+      {/* Film grain — same texture as the hero, for a cohesive transition */}
+      <div
+        className="pointer-events-none"
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: "url('/noise.svg')",
+          opacity: 0.05,
+          mixBlendMode: "overlay",
         }}
       />
 

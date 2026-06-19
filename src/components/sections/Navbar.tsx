@@ -157,13 +157,13 @@ export function Navbar() {
               <span className="hidden lg:block text-[9px] font-mono tracking-[0.25em] text-muted uppercase mb-2" style={{ fontFamily: "var(--font-mono)" }}>
                 Connect
               </span>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors duration-200" style={{ fontFamily: "var(--font-sans)", fontWeight: 300 }}>
+              <a href="https://linkedin.com/in/sithika-weerasinghe" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors duration-200" style={{ fontFamily: "var(--font-sans)", fontWeight: 300 }}>
                 LinkedIn
               </a>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors duration-200" style={{ fontFamily: "var(--font-sans)", fontWeight: 300 }}>
+              <a href="https://github.com/SithikaWeerasinghe" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors duration-200" style={{ fontFamily: "var(--font-sans)", fontWeight: 300 }}>
                 GitHub
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors duration-200" style={{ fontFamily: "var(--font-sans)", fontWeight: 300 }}>
+              <a href="https://instagram.com/sithika.weerasinghe" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors duration-200" style={{ fontFamily: "var(--font-sans)", fontWeight: 300 }}>
                 Instagram
               </a>
               <a href="mailto:sithikaweerasinghe2005@gmail.com" className="text-white/40 hover:text-white transition-colors duration-200" style={{ fontFamily: "var(--font-sans)", fontWeight: 300 }}>

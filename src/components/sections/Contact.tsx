@@ -7,7 +7,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 const EMAIL = "sithikaweerasinghe2005@gmail.com";
 
 const SOCIALS = [
-  { label: "GitHub", href: "https://github.com/sithika-weerasinghe" },
+  { label: "GitHub", href: "https://github.com/SithikaWeerasinghe" },
   { label: "LinkedIn", href: "https://linkedin.com/in/sithika-weerasinghe" },
   { label: "Instagram", href: "https://instagram.com/sithika.weerasinghe" },
 ];
